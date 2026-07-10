@@ -2,4 +2,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://www.indianbrokertest.in/sitemap-index.xml
+Sitemap: https://www.indianbrokertest.com/sitemap-index.xml

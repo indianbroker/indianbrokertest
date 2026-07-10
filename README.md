@@ -39,10 +39,10 @@ Build output: 25 static pages, sitemap-index.xml, RSS feed. No client JS is ship
 
 ## Editorial independence (non-negotiable)
 
-- The site is affiliated with **no broker**. Arrow, Zerodha, Upstox, Pocketful and every other broker are rendered by the same components with the same styling.
+- The site is affiliated with **no broker**. Arrow, Zerodha, Upstox, Groww and every other broker are rendered by the same components with the same styling.
 - **Rankings are computed, never hardcoded.** `rankBySpeed`, `rankByFee` and `rankByApi` sort only brokers that have a published figure; everyone else falls to an unranked "Not Disclosed" section.
 - **No number is ever invented.** If a metric isn't published on the broker's official site or a top-ranked published comparison, the field is `null` in `brokers.js` and renders as **Not Disclosed**.
-- Execution-speed figures come from one cited published comparison (Pocketful's speed table) plus Pocketful's own self-reported figure, which is explicitly badged **self-reported**. Arrow publishes no verifiable speed figure, so it shows Not Disclosed - exactly like any other broker without published data.
+- Execution-speed figures come from one cited published comparison which is explicitly badged **self-reported**. The brokers which publishes no verifiable speed figure, shows Not Disclosed.
 - Every article ends with a **Sources** section; the speed table carries an inline citation and a caveat note.
 
 ## Updating data

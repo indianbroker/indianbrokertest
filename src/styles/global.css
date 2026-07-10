@@ -12,8 +12,8 @@
   --rule: #dcdfd8;
   --green: #0c6b4d;
   --green-dim: #e6f1ec;
-  --amber: #957316;
-  --amber-dim: #f8f6f2;
+  --amber: #479d0e;
+  --amber-dim: #f4f8f2;
   --serif: Charter, 'Bitstream Charter', 'Sitka Text', Cambria, Georgia, serif;
   --sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
@@ -234,7 +234,7 @@ td:first-child, th:first-child { padding-left: 0.4rem; }
   letter-spacing: 0.04em;
   color: var(--amber);
   background: var(--amber-dim);
-  border: 1px solid #e5d4ac;
+  border: 1px solid #cde2c0;
   padding: 0.05rem 0.45rem;
   border-radius: 2px;
   white-space: nowrap;
@@ -266,8 +266,8 @@ td:first-child, th:first-child { padding-left: 0.4rem; }
     -45deg,
     var(--amber-dim),
     var(--amber-dim) 5px,
-    #ece0c4 5px,
-    #ece0c4 10px
+    #c7ecc4 5px,
+    #ccecc4 10px
   );
 }
 .latency-label { font-family: var(--mono); font-size: 0.82rem; }

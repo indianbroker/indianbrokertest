@@ -2,7 +2,7 @@
  * JSON-LD builders. Schema text must always match visible on-page content.
  */
 
-const SITE = 'https://www.indianbrokertest.in';
+const SITE = 'https://www.indianbrokertest.com';
 const SITE_NAME = 'Indian Broker Test';
 
 export function websiteSchema() {
