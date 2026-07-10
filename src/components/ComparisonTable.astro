@@ -1,0 +1,50 @@
+---
+import { nd } from '../utils/ranking.js';
+const { brokers, caption = 'Broker comparison at a glance' } = Astro.props;
+---
+<div class="table-wrap">
+  <table>
+    <caption>{caption}</caption>
+    <thead>
+      <tr>
+        <th scope="col">Broker</th>
+        <th scope="col">Delivery</th>
+        <th scope="col">Intraday</th>
+        <th scope="col">F&amp;O</th>
+        <th scope="col">Reported speed</th>
+        <th scope="col">API</th>
+        <th scope="col">AMC</th>
+        <th scope="col">Source</th>
+      </tr>
+    </thead>
+    <tbody>
+      {brokers.map((b) => (
+        <tr>
+          <td><a href={`/brokers/${b.slug}/`}>{b.name}</a></td>
+          <td>{b.brokerage?.delivery ?? <span class="nd">Not Disclosed</span>}</td>
+          <td>{b.brokerage?.intraday ?? <span class="nd">Not Disclosed</span>}</td>
+          <td>{b.brokerage?.fno ?? <span class="nd">Not Disclosed</span>}</td>
+          <td class="tnum">
+            {b.execSpeed ? b.execSpeed.display : <span class="nd">Not Disclosed</span>}
+          </td>
+          <td>
+            {b.api?.available === true
+              ? b.api.name
+              : b.api?.available === false
+                ? 'No'
+                : <span class="nd">Not Disclosed</span>}
+          </td>
+          <td>{nd(b.amc) === 'Not Disclosed' ? <span class="nd">Not Disclosed</span> : b.amc}</td>
+          <td>
+            <a href={b.pricingUrl} rel="nofollow noopener">Official</a>
+          </td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
+<p class="table-note">
+  Brokerage excludes statutory charges (STT/CTT, exchange transaction fees, SEBI fees, GST,
+  stamp duty), which apply at every broker. Verify current schedules on each official
+  pricing page before opening an account.
+</p>

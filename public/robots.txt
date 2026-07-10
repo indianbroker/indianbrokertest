@@ -1,0 +1,5 @@
+# Indian Broker Test - robots.txt
+User-agent: *
+Allow: /
+
+Sitemap: https://www.indianbrokertest.in/sitemap-index.xml

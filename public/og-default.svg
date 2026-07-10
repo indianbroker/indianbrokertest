@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#fdfdfb"/>
+  <rect y="0" width="1200" height="10" fill="#0c6b4d"/>
+  <text x="80" y="180" font-family="Georgia, serif" font-size="34" fill="#0c6b4d" letter-spacing="6">INDEPENDENT · DATA-DRIVEN · NO AFFILIATE LINKS</text>
+  <text x="80" y="310" font-family="Georgia, serif" font-size="88" font-weight="bold" fill="#1a2420">Indian Broker Test</text>
+  <text x="80" y="400" font-family="Arial, sans-serif" font-size="38" fill="#4c5a53">Indian stock brokers, compared on published facts.</text>
+  <path d="M80 520 L280 470 L440 500 L700 420 L980 460 L1120 390" stroke="#0c6b4d" stroke-width="8" fill="none" stroke-linecap="round"/>
+</svg>

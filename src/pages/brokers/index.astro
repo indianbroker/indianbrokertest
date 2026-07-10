@@ -1,0 +1,37 @@
+---
+import ArticleLayout from '../../layouts/ArticleLayout.astro';
+import { brokers } from '../../data/brokers.js';
+import { alphabetical } from '../../utils/ranking.js';
+import { itemListSchema, collectionPageSchema } from '../../utils/schema.js';
+
+const path = '/brokers/';
+const sorted = alphabetical(brokers);
+const schemas = [
+  collectionPageSchema({
+    title: 'All Indian Broker Profiles',
+    description: 'Independent profiles of Indian stock brokers, compiled from official published information.',
+    path,
+  }),
+  itemListSchema({ name: 'Indian broker profiles', path, items: sorted }),
+];
+---
+
+<ArticleLayout
+  title="All Broker Profiles: Every Indian Broker We Track"
+  metaTitle="Indian Broker Profiles - Independent, Sourced Reviews"
+  description="Independent profiles of Indian stock brokers: brokerage, platforms, APIs and reported execution speed, sourced from official pages. Alphabetical, no rankings."
+  path={path}
+  eyebrow="Directory"
+  standfirst="Every broker in our dataset, alphabetically. Each profile is compiled only from official published information and cited comparisons, with gaps marked Not Disclosed."
+  crumbs={[{ name: 'Brokers', path }]}
+  schemas={schemas}
+>
+  <ul class="card-grid">
+    {sorted.map((b) => (
+      <li class="card">
+        <a href={`/brokers/${b.slug}/`}>{b.name}</a>
+        <p>{b.type}</p>
+      </li>
+    ))}
+  </ul>
+</ArticleLayout>

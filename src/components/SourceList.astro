@@ -1,0 +1,15 @@
+---
+const { sources = [] } = Astro.props;
+---
+<section class="sources" aria-labelledby="sources-heading">
+  <h2 id="sources-heading">Sources</h2>
+  <ol>
+    {sources.map((s) => (
+      <li>
+        {s.label}{' - '}
+        <a href={s.url} rel="nofollow noopener">{s.url}</a>
+        {s.note && <> ({s.note})</>}
+      </li>
+    ))}
+  </ol>
+</section>

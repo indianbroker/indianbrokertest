@@ -1,0 +1,123 @@
+---
+import ArticleLayout from '../layouts/ArticleLayout.astro';
+import Faq from '../components/Faq.astro';
+import SourceList from '../components/SourceList.astro';
+import { brokers } from '../data/brokers.js';
+import { rankByApi } from '../utils/ranking.js';
+import { faqSchema, itemListSchema } from '../utils/schema.js';
+
+const path = '/best-trading-apis-in-india/';
+const { ranked, undisclosed } = rankByApi(brokers);
+
+const faqs = [
+  {
+    q: 'Which Indian brokers offer a trading API?',
+    a: `Of the brokers we track, ${ranked.length} document a public trading API: ${ranked.map((b) => `${b.name} (${b.api.name})`).join(', ')}. Several are free per their official pages; others are priced or plan-dependent - pricing links are in the table.`,
+  },
+  {
+    q: 'Which trading API is free in India?',
+    a: 'Per their official developer pages at our last review, Angel One SmartAPI, Upstox API, DhanHQ, Fyers API, Alice Blue ANT API, Shoonya API and Pocketful API are documented as free. Others are paid or plan-based - always confirm on the official page, as API pricing changes more often than brokerage.',
+  },
+  {
+    q: 'What should I compare beyond API price?',
+    a: 'Rate limits, WebSocket market-data quality, historical-data access, order types supported, SDK languages, documentation quality, and the broker\u2019s execution reliability during volatile sessions. A free API with poor uptime costs more than a paid one that works.',
+  },
+  {
+    q: 'Is algo trading legal for retail traders in India?',
+    a: 'Yes, within SEBI\u2019s framework. SEBI has issued regulations for retail algorithmic trading through broker APIs, including requirements around order tagging and broker oversight. Check your broker\u2019s current compliance documentation before deploying automated strategies.',
+  },
+];
+
+const schemas = [
+  faqSchema(faqs),
+  itemListSchema({ name: 'Indian brokers with documented trading APIs', path, items: ranked }),
+];
+---
+
+<ArticleLayout
+  title="Best Trading APIs in India (2026): Every Broker API Compared"
+  metaTitle="Best Trading APIs in India (2026) - Broker APIs Compared"
+  description="Every documented Indian broker trading API compared: name, published pricing and official docs. Sourced from official developer pages; unpublished details shown as Not Disclosed."
+  path={path}
+  eyebrow="Developer comparison"
+  standfirst="Every broker in our dataset with a documented public API, with published pricing and official documentation links - and no editor's-choice badge, because 'best' depends on your stack."
+  crumbs={[{ name: 'Best trading APIs in India', path }]}
+  schemas={schemas}
+>
+  <div class="table-wrap">
+    <table>
+      <caption>Trading APIs of Indian brokers (alphabetical)</caption>
+      <thead>
+        <tr>
+          <th scope="col">Broker</th>
+          <th scope="col">API</th>
+          <th scope="col">Published pricing</th>
+          <th scope="col">Algo support</th>
+          <th scope="col">Reported execution speed</th>
+          <th scope="col">Docs</th>
+        </tr>
+      </thead>
+      <tbody>
+        {ranked.map((b) => (
+          <tr>
+            <td><a href={`/brokers/${b.slug}/`}>{b.name}</a></td>
+            <td>{b.api.name}</td>
+            <td>{b.api.pricing ?? <span class="nd">Not Disclosed</span>}</td>
+            <td>{b.algoSupport ?? <span class="nd">Not Disclosed</span>}</td>
+            <td class="tnum">{b.execSpeed ? b.execSpeed.display : <span class="nd">Not Disclosed</span>}</td>
+            <td><a href={b.api.url} rel="nofollow noopener">Official</a></td>
+          </tr>
+        ))}
+        {undisclosed.map((b) => (
+          <tr>
+            <td><a href={`/brokers/${b.slug}/`}>{b.name}</a></td>
+            <td><span class="nd">Not Disclosed</span></td>
+            <td><span class="nd">Not Disclosed</span></td>
+            <td><span class="nd">Not Disclosed</span></td>
+            <td class="tnum">{b.execSpeed ? b.execSpeed.display : <span class="nd">Not Disclosed</span>}</td>
+            <td><a href={b.website} rel="nofollow noopener">Website</a></td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+  <p class="table-note">
+    "Not Disclosed" means no documented public API (or API detail) was found on the broker's
+    official site at review time. API pricing and rate limits change frequently - the official
+    documentation link is authoritative.
+  </p>
+
+  <h2>What separates these APIs in practice</h2>
+  <p>
+    On paper most Indian broker APIs look alike: REST order placement, WebSocket market data, a
+    Python SDK. The practical differences are rate limits, historical-data depth and cost,
+    stability during expiry-day volume spikes, and how quickly breaking changes are communicated.
+    Zerodha's Kite Connect has the longest track record and the largest third-party ecosystem;
+    Angel One's SmartAPI and the free APIs from Upstox, Dhan, Fyers, Alice Blue and Shoonya remove
+    the cost barrier entirely; Dhan and Fyers add native TradingView integration, which matters if
+    your signals originate in Pine Script.
+  </p>
+
+  <h2>Execution speed and APIs</h2>
+  <p>
+    For API traders, latency matters more than for app users - but as the table shows, most
+    brokers publish no figure, and the figures that exist are approximate and unaudited. Our
+    <a href="/fastest-order-execution-brokers-in-india/">speed comparison</a> covers what is
+    published; for anything serious, benchmark round-trip times yourself against each broker's
+    API from your own infrastructure.
+  </p>
+
+  <h2>Conclusion</h2>
+  <p>
+    If cost is the filter, the free, documented APIs are the shortlist. If ecosystem maturity is
+    the filter, the longest-established API ecosystems lead. There is no single best API - match
+    rate limits, data access and reliability to your strategy, and verify every published detail
+    on the official developer page, which is linked in each row.
+  </p>
+
+  <Faq faqs={faqs} />
+
+  <SourceList
+    sources={ranked.map((b) => ({ label: `${b.name} - ${b.api.name} official page`, url: b.api.url }))}
+  />
+</ArticleLayout>

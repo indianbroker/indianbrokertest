@@ -1,0 +1,133 @@
+---
+import '../styles/global.css';
+import { websiteSchema, organizationSchema } from '../utils/schema.js';
+
+const {
+  title,
+  description,
+  path = '/',
+  ogType = 'website',
+  schemas = [],
+  published,
+  modified,
+} = Astro.props;
+
+const SITE = 'https://www.indianbrokertest.in';
+const canonical = SITE + path;
+const ogImage = SITE + '/og-default.svg';
+
+const nav = [
+  { href: '/best-stock-brokers-in-india/', label: 'Best Brokers' },
+  { href: '/fastest-order-execution-brokers-in-india/', label: 'Fastest Execution' },
+  { href: '/lowest-brokerage-brokers-in-india/', label: 'Lowest Brokerage' },
+  { href: '/best-trading-apis-in-india/', label: 'Trading APIs' },
+  { href: '/brokers/', label: 'All Brokers' },
+  { href: '/methodology/', label: 'Methodology' },
+];
+
+const allSchemas = [websiteSchema(), organizationSchema(), ...schemas];
+const currentPath = Astro.url.pathname;
+---
+
+<!doctype html>
+<html lang="en-IN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+    <meta name="color-scheme" content="light" />
+    <meta name="theme-color" content="#0c6b4d" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <link rel="alternate" type="application/rss+xml" title="Indian Broker Test" href="/rss.xml" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content={ogType} />
+    <meta property="og:site_name" content="Indian Broker Test" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:locale" content="en_IN" />
+    {published && <meta property="article:published_time" content={published} />}
+    {modified && <meta property="article:modified_time" content={modified} />}
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+
+    {allSchemas.map((s) => <script type="application/ld+json" set:html={JSON.stringify(s)} />)}
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to main content</a>
+
+    <p class="independence-strip">
+      Independent comparison. No broker affiliation, sponsorship or referral fees. Rankings are computed only from published, verifiable data.
+    </p>
+
+    <header class="site-header">
+      <div class="inner">
+        <a class="logo" href="/">Indian Broker <span class="tick">Test</span></a>
+        <nav class="site-nav" aria-label="Main navigation">
+          <ul>
+            {nav.map((item) => (
+              <li>
+                <a href={item.href} aria-current={currentPath === item.href ? 'page' : undefined}>{item.label}</a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main" class="page">
+      <slot />
+    </main>
+
+    <footer class="site-footer">
+      <div class="inner">
+        <div>
+          <h2>Indian Broker Test</h2>
+          <p>
+            An independent editorial publication comparing Indian stock brokers using only
+            verifiable published information. We are not affiliated with, sponsored by, or
+            endorsed by any broker, and we accept no referral fees. Where a broker does not
+            publish a figure, we show <strong>Not Disclosed</strong> - we never estimate or invent data.
+          </p>
+        </div>
+        <div>
+          <h2>Comparisons</h2>
+          <ul>
+            <li><a href="/best-stock-brokers-in-india/">Best stock brokers</a></li>
+            <li><a href="/fastest-order-execution-brokers-in-india/">Fastest order execution</a></li>
+            <li><a href="/lowest-brokerage-brokers-in-india/">Lowest brokerage</a></li>
+            <li><a href="/best-trading-apis-in-india/">Best trading APIs</a></li>
+            <li><a href="/best-brokers-for-algo-trading/">Best for algo trading</a></li>
+            <li><a href="/best-brokers-for-active-traders/">Best for active traders</a></li>
+          </ul>
+        </div>
+        <div>
+          <h2>About</h2>
+          <ul>
+            <li><a href="/about/">About this site</a></li>
+            <li><a href="/methodology/">Methodology</a></li>
+            <li><a href="/brokers/">All broker profiles</a></li>
+            <li><a href="/rss.xml">RSS feed</a></li>
+          </ul>
+        </div>
+      </div>
+      <p class="legal">
+        Investments in securities markets are subject to market risks; read all related
+        documents carefully before investing. Indian Broker Test is an information
+        publication, not a SEBI-registered investment adviser or broker, and nothing here
+        is investment advice. All trademarks belong to their respective owners. Verify all
+        figures on each broker's official website before acting on them.
+      </p>
+    </footer>
+  </body>
+</html>

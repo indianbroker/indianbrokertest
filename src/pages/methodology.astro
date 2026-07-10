@@ -1,0 +1,70 @@
+---
+import ArticleLayout from '../layouts/ArticleLayout.astro';
+import { brokers, DATA_COMPILED } from '../data/brokers.js';
+
+const path = '/methodology/';
+---
+
+<ArticleLayout
+  title="Methodology: How Indian Broker Test Compiles and Ranks Data"
+  metaTitle="Methodology - Indian Broker Test"
+  description="How this independent broker comparison works: official sources only, Not Disclosed for unverifiable data, computed rankings, no affiliation with any broker."
+  path={path}
+  eyebrow="Editorial standards"
+  standfirst="The rules this site operates under. They are deliberately strict, and they apply to every broker identically."
+  crumbs={[{ name: 'Methodology', path }]}
+>
+  <h2>1. Independence</h2>
+  <p>
+    Indian Broker Test is not affiliated with, sponsored by, endorsed by, or in any commercial
+    relationship with any broker it covers. There are no affiliations, referral codes or paid
+    placements anywhere on the site. No broker receives preferential treatment in data, ranking,
+    layout or language - every broker, large or small, old or new, is rendered by the same
+    templates from the same dataset.
+  </p>
+
+  <h2>2. Sources, in order of preference</h2>
+  <p>
+    First, the broker's own official website - pricing pages, developer documentation and product
+    pages. Second, where a broker does not publish a metric, top-ranked published comparisons,
+    always with the source recorded and linked. If a figure exists in neither place, it is shown
+    as <span class="nd">Not Disclosed</span>. We never estimate, infer, average or invent a number,
+    and we never fill a gap because a table would look tidier with it filled.
+  </p>
+
+  <h2>3. Rankings are computed, never written</h2>
+  <p>
+    Where a page ranks brokers, the order is calculated at build time from the dataset by a sort
+    function - lowest published latency first, cheapest published fee first, and so on. Brokers
+    without a published value for the metric being ranked are listed after ranked brokers,
+    alphabetically, marked Not Disclosed; they are never assigned a guessed position. Where no
+    single verifiable metric exists (for example "best overall"), we list alphabetically and say
+    why. If another broker performs better on a metric than any given broker, the computed order
+    reflects that - there is no override mechanism in the codebase.
+  </p>
+
+  <h2>4. Speed figures get extra scepticism</h2>
+  <p>
+    Execution-speed claims are the least standardised numbers in broking: methodology, order type,
+    percentile and market conditions are rarely stated. We publish only figures that appear in a
+    citable source, we label self-reported figures explicitly, and we repeat the source's own
+    caveat that figures are approximate. This site has not yet run its own latency benchmark; if
+    it does, the full methodology and raw data will be published alongside the results.
+  </p>
+
+  <h2>5. Review cadence and corrections</h2>
+  <p>
+    Each page shows its data-review date (currently {DATA_COMPILED}). Broker pricing changes
+    without notice, so official pages linked in every table remain authoritative. If you find an
+    error, the fastest fix is to point us to the official page showing the correct figure; verified
+    corrections are applied at the next review and the review date updated.
+  </p>
+
+  <h2>6. What this site is not</h2>
+  <p>
+    Indian Broker Test is an information publication. It is not a SEBI-registered investment
+    adviser, research analyst or broker, and nothing here is a recommendation to open an account,
+    trade, or invest. Currently tracking {brokers.length} brokers; inclusion is based on retail
+    relevance in India, and any SEBI-registered retail broker can be added.
+  </p>
+</ArticleLayout>

@@ -1,0 +1,17 @@
+---
+/**
+ * FAQ - renders visible Q&A. The page passing `faqs` must also pass
+ * faqSchema(faqs) into its layout so the JSON-LD text matches the visible
+ * on-page text word for word.
+ */
+const { faqs = [] } = Astro.props;
+---
+<section class="faq" aria-labelledby="faq-heading">
+  <h2 id="faq-heading">Frequently asked questions</h2>
+  {faqs.map((f) => (
+    <details>
+      <summary>{f.q}</summary>
+      <p>{f.a}</p>
+    </details>
+  ))}
+</section>

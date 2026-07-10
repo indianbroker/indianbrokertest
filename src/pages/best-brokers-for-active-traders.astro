@@ -1,0 +1,104 @@
+---
+import ArticleLayout from '../layouts/ArticleLayout.astro';
+import SpeedTable from '../components/SpeedTable.astro';
+import Faq from '../components/Faq.astro';
+import SourceList from '../components/SourceList.astro';
+import { brokers, SOURCES } from '../data/brokers.js';
+import { alphabetical } from '../utils/ranking.js';
+import { faqSchema, itemListSchema } from '../utils/schema.js';
+
+const path = '/best-brokers-for-active-traders/';
+const sorted = alphabetical(brokers);
+
+const faqs = [
+  {
+    q: 'Which broker is best for active intraday traders in India?',
+    a: 'On published data, active traders should shortlist brokers combining flat per-order pricing (₹20 or lower, or zero at Shoonya), a documented API or advanced platform, and - where published - a competitive execution-speed figure. In the independent AlgoTest Broker Speedtest the fastest measured brokers sit around 80 ms (median), while Arrow self-reports a far lower figure on its own site; most brokers publish no speed figure at all, so platform stability during volatile sessions, which is also undocumented, is best judged by your own testing.',
+  },
+  {
+    q: 'How much does an active trader pay in charges?',
+    a: 'At flat-fee brokers, brokerage is capped per order (typically ₹20), but statutory charges scale with turnover - STT/CTT, exchange fees, GST and stamp duty usually exceed brokerage for high-turnover traders. Contract-note simulators on official broker sites show the full breakdown.',
+  },
+  {
+    q: 'Do active traders need a full-service broker?',
+    a: 'Usually not for execution - flat-fee brokers are cheaper per order. Full-service and bank-backed brokers add research, dealer support and 3-in-1 banking, which some high-volume traders value; that is a service trade-off, not a data-driven ranking.',
+  },
+  {
+    q: 'What platform features matter most for active trading?',
+    a: 'Order speed and reliability under load, good option-chain and market-depth views, fast order modification, bracket/cover order types, and charting you can act from directly. Several brokers now offer TradingView-native platforms, which many active traders prefer.',
+  },
+];
+
+const schemas = [
+  faqSchema(faqs),
+  itemListSchema({ name: 'Brokers for active traders in India', path, items: sorted }),
+];
+---
+
+<ArticleLayout
+  title="Best Brokers for Active Traders in India (2026): Costs, Speed & Tools Compared"
+  metaTitle="Best Brokers for Active Traders in India (2026)"
+  description="Indian brokers compared for active trading: per-order costs, reported execution speed, APIs and platforms - from official pages and cited comparisons only."
+  path={path}
+  eyebrow="Active trading"
+  standfirst="For traders placing many orders a day, three published facts matter most: what each order costs, how fast it reportedly executes, and what tooling sits around it. Here is all three, sourced."
+  crumbs={[{ name: 'Best brokers for active traders', path }]}
+  schemas={schemas}
+>
+  <h2>Cost and tooling comparison</h2>
+  <div class="table-wrap">
+    <table>
+      <caption>Active-trader comparison (alphabetical)</caption>
+      <thead>
+        <tr>
+          <th scope="col">Broker</th>
+          <th scope="col">Intraday</th>
+          <th scope="col">F&amp;O</th>
+          <th scope="col">Platforms</th>
+          <th scope="col">API</th>
+        </tr>
+      </thead>
+      <tbody>
+        {sorted.map((b) => (
+          <tr>
+            <td><a href={`/brokers/${b.slug}/`}>{b.name}</a></td>
+            <td>{b.brokerage?.intraday ?? <span class="nd">Not Disclosed</span>}</td>
+            <td>{b.brokerage?.fno ?? <span class="nd">Not Disclosed</span>}</td>
+            <td>{b.platforms ? b.platforms.join(', ') : <span class="nd">Not Disclosed</span>}</td>
+            <td>{b.api?.available === true ? b.api.name : <span class="nd">Not Disclosed</span>}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+
+  <h2>Reported execution speed</h2>
+  <SpeedTable brokers={brokers} caption="Reported execution speed - a key metric for active traders" />
+
+  <h2>Reading the trade-offs</h2>
+  <p>
+    Per-order cost is nearly a solved problem: almost every broker here caps intraday and F&O at
+    ₹20 per order or less, and one charges nothing. The real differentiation for active traders is
+    in the undocumented parts - stability at 9:15 open and on expiry days, order-modification
+    latency, and margin-call handling - plus documented tooling like options-specific platforms,
+    TradingView integration and market-depth views. Where speed figures are published we rank them
+    above; where they are not, no honest ranking is possible, and we say so rather than fill the
+    gap.
+  </p>
+
+  <h2>Conclusion</h2>
+  <p>
+    Shortlist on published facts - flat fees, tooling, API - then decide with a live test: trade
+    small size at two or three shortlisted brokers through a volatile session and compare fills.
+    That single experiment tells an active trader more than any table of self-reported
+    milliseconds, including this one.
+  </p>
+
+  <Faq faqs={faqs} />
+
+  <SourceList
+    sources={[
+      { label: 'Official broker pricing and platform pages (linked in each profile)', url: 'https://www.indianbrokertest.in/brokers/' },
+    ]}
+  />
+</ArticleLayout>

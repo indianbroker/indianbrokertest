@@ -1,0 +1,115 @@
+---
+import ArticleLayout from '../layouts/ArticleLayout.astro';
+import SpeedTable from '../components/SpeedTable.astro';
+import Faq from '../components/Faq.astro';
+import SourceList from '../components/SourceList.astro';
+import { brokers, SOURCES } from '../data/brokers.js';
+import { rankByApi } from '../utils/ranking.js';
+import { faqSchema, itemListSchema } from '../utils/schema.js';
+
+const path = '/best-brokers-for-algo-trading/';
+const { ranked } = rankByApi(brokers);
+const freeApis = ranked.filter((b) => /free/i.test(b.api.pricing ?? ''));
+
+const faqs = [
+  {
+    q: 'Which broker is best for algo trading in India?',
+    a: 'It depends on your stack. On published data: brokers with free documented APIs (Angel One, Upstox, Dhan, Fyers, Alice Blue, Shoonya, Pocketful) remove the cost barrier; Zerodha\u2019s Kite Connect has the largest developer ecosystem; Dhan and Fyers suit TradingView-based strategies. Execution-speed data is published for only a minority of brokers, so speed-based rankings from public data are necessarily incomplete.',
+  },
+  {
+    q: 'Do I need SEBI approval to run my own algos?',
+    a: 'Retail traders operate under SEBI\u2019s retail algo framework, which places compliance obligations largely on brokers (including order tagging and oversight of API-based algos). You do not register your personal strategy with SEBI, but you must comply with your broker\u2019s API terms and applicable SEBI circulars.',
+  },
+  {
+    q: 'Which free API should I start with?',
+    a: 'Any documented free API with an SDK in your language is a reasonable start. Compare rate limits, WebSocket data quality and historical-data access on the official docs - these differ more than headline features do.',
+  },
+  {
+    q: 'Does execution speed matter for retail algos?',
+    a: 'For most retail strategies (minutes-to-days holding periods), broker-side latency differences of tens of milliseconds are immaterial next to slippage, data quality and fill logic. For scalping or latency-sensitive options strategies, benchmark brokers yourself - published figures are too sparse and too approximate to decide on.',
+  },
+];
+
+const schemas = [
+  faqSchema(faqs),
+  itemListSchema({ name: 'Brokers for algo trading in India (documented APIs)', path, items: ranked }),
+];
+---
+
+<ArticleLayout
+  title="Best Brokers for Algo Trading in India (2026): APIs, Costs & Published Speeds"
+  metaTitle="Best Brokers for Algo Trading in India (2026)"
+  description="Indian brokers for algorithmic trading compared on documented APIs, published pricing and reported execution speed - sourced, cited, with gaps marked Not Disclosed."
+  path={path}
+  eyebrow="Systematic trading"
+  standfirst="The algo-relevant facts - API availability, published API pricing, algo-platform support and reported execution speed - compared without an editor's thumb on the scale."
+  crumbs={[{ name: 'Best brokers for algo trading', path }]}
+  schemas={schemas}
+>
+  <h2>APIs and algo support at a glance</h2>
+  <div class="table-wrap">
+    <table>
+      <caption>Algo-trading readiness (alphabetical among brokers with documented APIs)</caption>
+      <thead>
+        <tr>
+          <th scope="col">Broker</th>
+          <th scope="col">API</th>
+          <th scope="col">Published API pricing</th>
+          <th scope="col">Algo support</th>
+          <th scope="col">F&amp;O brokerage</th>
+        </tr>
+      </thead>
+      <tbody>
+        {ranked.map((b) => (
+          <tr>
+            <td><a href={`/brokers/${b.slug}/`}>{b.name}</a></td>
+            <td><a href={b.api.url} rel="nofollow noopener">{b.api.name}</a></td>
+            <td>{b.api.pricing ?? <span class="nd">Not Disclosed</span>}</td>
+            <td>{b.algoSupport ?? <span class="nd">Not Disclosed</span>}</td>
+            <td>{b.brokerage?.fno ?? <span class="nd">Not Disclosed</span>}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+  <p class="table-note">
+    Brokers without a documented public API are excluded from this table; they appear in the
+    <a href="/best-trading-apis-in-india/">full API comparison</a> marked Not Disclosed.
+  </p>
+
+  <h2>Published execution speeds</h2>
+  <p>
+    Latency is the metric algo traders ask about first and brokers document least. The table below
+    is the complete set of published figures we could verify - everything else is honestly labelled.
+  </p>
+  <SpeedTable brokers={brokers} caption="Reported execution speed - relevant to latency-sensitive strategies" />
+
+  <h2>Choosing a stack</h2>
+  <p>
+    Cost-first builders can pick from the free documented APIs - {freeApis.map((b) => b.name).join(', ')} -
+    where the marginal cost of a strategy is only brokerage and statutory charges (and at
+    zero-brokerage Shoonya, only statutory charges). Ecosystem-first builders tend toward the
+    longest-established API with the most third-party libraries and integrations. TradingView-first
+    builders should look at the brokers with native TradingView order placement. Whatever the pick,
+    test order rejection behaviour, rate-limit handling and expiry-day stability with small size
+    before scaling.
+  </p>
+
+  <h2>Conclusion</h2>
+  <p>
+    India's algo-broker choice is genuinely competitive: multiple free APIs, flat derivatives
+    pricing, and one zero-brokerage option. The public record cannot crown a speed winner -
+    published latency figures cover only a minority of brokers and are approximate - so build your
+    shortlist on documented API terms and verify latency empirically from your own servers.
+  </p>
+
+  <Faq faqs={faqs} />
+
+  <SourceList
+    sources={[
+      ...ranked.map((b) => ({ label: `${b.name} - ${b.api.name} official page`, url: b.api.url })),
+      SOURCES['algotest-speed'],
+      SOURCES['arrow-official'],
+    ]}
+  />
+</ArticleLayout>

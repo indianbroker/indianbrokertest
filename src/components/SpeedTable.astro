@@ -1,0 +1,92 @@
+---
+/**
+ * SpeedTable - the site's signature element.
+ * Modelled on the simple published format (S.No | Broker | Average Execution Speed)
+ * with two editorial additions: a pure-CSS latency bar (shorter = faster) and a
+ * Source column. Brokers with no published figure appear after ranked brokers
+ * with a hatched "Not Disclosed" bar. No JavaScript.
+ */
+import { rankBySpeed, rankBySpeedStrict } from '../utils/ranking.js';
+import { SOURCES, DATA_COMPILED } from '../data/brokers.js';
+
+const {
+  brokers,
+  caption = 'Reported order execution speed - Indian brokers',
+  showUndisclosed = true,
+  // When true, sort strictly by the published figure with no editorial
+  // placement - each broker sits exactly where its speed ranks it.
+  strictOrder = false,
+} = Astro.props;
+const { ranked, undisclosed } = (strictOrder ? rankBySpeedStrict : rankBySpeed)(brokers);
+const maxMs = Math.max(...ranked.map((b) => b.execSpeed.sortMs), 1);
+
+// The "self-reported" status is conveyed by the badge tag, so strip any
+// redundant "self-reported" text baked into the display string. Keeps other
+// qualifiers (e.g. "DEXT", "processing") and drops now-empty parentheses.
+const cleanDisplay = (d) =>
+  d
+    .replace(/,?\s*self-reported/gi, '')
+    .replace(/\(\s*\)/g, '')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+const fmt = new Date(DATA_COMPILED + 'T00:00:00+05:30').toLocaleDateString('en-IN', {
+  day: 'numeric', month: 'long', year: 'numeric',
+});
+---
+
+<div class="table-wrap">
+  <table>
+    <caption>{caption}</caption>
+    <thead>
+      <tr>
+        <th scope="col">S.No</th>
+        <th scope="col">Broker</th>
+        <th scope="col" class="latency-cell">Reported execution speed</th>
+        <th scope="col">Source</th>
+      </tr>
+    </thead>
+    <tbody>
+      {ranked.map((b, i) => (
+        <tr>
+          <td class="tnum">{i + 1}</td>
+          <td><a href={`/brokers/${b.slug}/`}>{b.name}</a></td>
+          <td class="latency-cell">
+            <span class="latency-label">{cleanDisplay(b.execSpeed.display)}</span>
+            {b.execSpeed.selfReported && <span class="badge-self">self-reported</span>}
+            <div
+              class={`latency-bar${b.execSpeed.selfReported ? ' self-reported' : ''}`}
+              style={`--pct:${Math.round((b.execSpeed.sortMs / maxMs) * 100)}%`}
+              aria-hidden="true"
+            ></div>
+          </td>
+          <td>
+            <a href={SOURCES[b.execSpeed.sourceId].url} rel="nofollow noopener">
+              {SOURCES[b.execSpeed.sourceId].label}
+            </a>
+          </td>
+        </tr>
+      ))}
+      {showUndisclosed && undisclosed.map((b, i) => (
+        <tr>
+          <td class="tnum">-</td>
+          <td><a href={`/brokers/${b.slug}/`}>{b.name}</a></td>
+          <td class="latency-cell">
+            <span class="nd">Not Disclosed</span>
+            <div class="latency-bar undisclosed" aria-hidden="true"></div>
+          </td>
+          <td>No published figure found</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
+<p class="table-note">
+  Figures are approximate, as published by the cited source ({fmt} review), and vary with
+  device, network and market conditions. They are broker- or publisher-reported, not
+  independently audited by this site.
+  {showUndisclosed && (
+    <> Brokers marked <span class="nd">Not Disclosed</span> had no published execution-speed
+    figure on their official website or in the AlgoTest Broker Speedtest at review time.</>
+  )}
+  {' '}Bar length is proportional to the midpoint of the reported range; shorter is faster.
+</p>

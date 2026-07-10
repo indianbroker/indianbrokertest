@@ -1,0 +1,101 @@
+---
+import ArticleLayout from '../layouts/ArticleLayout.astro';
+import ComparisonTable from '../components/ComparisonTable.astro';
+import Faq from '../components/Faq.astro';
+import SourceList from '../components/SourceList.astro';
+import { brokers, SOURCES } from '../data/brokers.js';
+import { alphabetical } from '../utils/ranking.js';
+import { faqSchema, itemListSchema } from '../utils/schema.js';
+
+const path = '/best-stock-brokers-in-india/';
+const sorted = alphabetical(brokers);
+
+const faqs = [
+  {
+    q: 'Which is the best stock broker in India?',
+    a: 'There is no single best broker - it depends on what you optimise for. On published data: Shoonya has the lowest headline brokerage (zero across segments), Zerodha, Dhan and Fyers combine free delivery with flat ₹20 derivatives pricing, bank-backed ICICI Direct and Kotak Neo add research and 3-in-1 integration, and on execution speed the independently measured leaders in the AlgoTest Broker Speedtest sit around 80 ms while Arrow self-reports a far lower figure. This page lists brokers alphabetically because a universal ranking would require weighting factors that differ per trader.',
+  },
+  {
+    q: 'Why is this list alphabetical instead of ranked 1 to 10?',
+    a: 'Because an overall ranking mixes incomparable things - cost, speed, research, platform quality - with arbitrary weights. Where a single verifiable metric exists, we rank by it on the dedicated pages (fastest execution, lowest brokerage, best APIs). Where it does not, we refuse to manufacture an order.',
+  },
+  {
+    q: 'Are discount brokers safe compared to full-service brokers?',
+    a: 'All brokers in this comparison operate under SEBI regulation, exchange membership rules, and investor-protection mechanisms such as segregated client funds and the exchanges\u2019 investor protection funds. Regulation does not eliminate business risk, so checking a broker\u2019s SEBI registration on the SEBI/exchange websites before opening an account is always sensible.',
+  },
+  {
+    q: 'What charges apply beyond brokerage?',
+    a: 'Every trade also carries statutory and exchange charges: securities/commodities transaction tax, exchange transaction fees, SEBI turnover fees, GST on brokerage and fees, and stamp duty. On delivery trades at zero-brokerage brokers, these statutory charges are typically the entire cost.',
+  },
+  {
+    q: 'How current is the data on this page?',
+    a: 'The data-review date is shown at the top of the article and on the comparison table. Broker pricing changes without notice, so verify the schedule on the official pricing page linked in each row before acting.',
+  },
+];
+
+const schemas = [
+  faqSchema(faqs),
+  itemListSchema({ name: 'Stock brokers in India compared', path, items: sorted }),
+];
+---
+
+<ArticleLayout
+  title="Best Stock Brokers in India (2026): Full Comparison of Pricing, Platforms & APIs"
+  metaTitle="Best Stock Brokers in India (2026) - Independent Comparison"
+  description="Independent comparison of Indian stock brokers: brokerage, AMC, platforms, APIs and reported execution speed, sourced from official pages. Unpublished figures shown as Not Disclosed."
+  path={path}
+  eyebrow="Master comparison"
+  standfirst="Every major comparison metric for the brokers we track, drawn from official pricing pages and cited published comparisons - with the gaps labelled honestly instead of papered over."
+  crumbs={[{ name: 'Best stock brokers in India', path }]}
+  schemas={schemas}
+>
+  <p>
+    India's retail broking market splits into a few broad camps: flat-fee discount brokers
+    (Zerodha, Upstox, Groww, Angel One, Dhan, Fyers, 5paisa, Alice Blue, Paytm Money, Pocketful,
+    Sahi), a low-latency specialist (Arrow), zero-brokerage outliers (Shoonya), and full-service
+    houses including bank-backed ICICI Direct and Kotak Neo and long-established IIFL Securities
+    that bundle research and, in the bank cases, banking integration. The right choice depends on whether you
+    optimise for cost, speed, tooling, or hand-holding - so rather than invent a universal
+    ranking, we put the verifiable facts side by side and rank only on the dedicated single-metric
+    pages linked below.
+  </p>
+
+  <ComparisonTable brokers={sorted} caption="Best stock brokers in India - full comparison (alphabetical)" />
+
+  <h2>Broker summaries</h2>
+  {sorted.map((b) => (
+    <>
+      <h3>{b.name}</h3>
+      <p>{b.overview} <a href={`/brokers/${b.slug}/`}>Full profile →</a></p>
+    </>
+  ))}
+
+  <h2>How to choose</h2>
+  <p>
+    Long-term delivery investors should weight delivery brokerage and AMC - the free-delivery,
+    zero-AMC combinations are hard to beat, since statutory charges are identical everywhere.
+    Intraday and options traders should weight per-order fees, platform stability and, where
+    published, execution speed (see the <a href="/fastest-order-execution-brokers-in-india/">speed
+    comparison</a>). Systematic traders should start from the
+    <a href="/best-trading-apis-in-india/"> API comparison</a>. Investors who want research and a
+    single banking relationship are the natural audience for the bank-backed full-service brokers,
+    accepting plan-based pricing in exchange.
+  </p>
+
+  <h2>Conclusion</h2>
+  <p>
+    On the published record, no broker dominates every column - which is exactly why single-winner
+    "best broker" headlines should be read sceptically, including ours. Use the table, follow the
+    official source links, and match the trade-offs to how you actually trade.
+  </p>
+
+  <Faq faqs={faqs} />
+
+  <SourceList
+    sources={[
+      { label: 'Official broker pricing pages (linked per row in the table and in each profile)', url: 'https://www.indianbrokertest.in/brokers/' },
+      SOURCES['algotest-speed'],
+      SOURCES['arrow-official'],
+    ]}
+  />
+</ArticleLayout>

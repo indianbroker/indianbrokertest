@@ -1,0 +1,73 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ComparisonTable from '../components/ComparisonTable.astro';
+import { brokers, DATA_COMPILED } from '../data/brokers.js';
+import { alphabetical } from '../utils/ranking.js';
+import { itemListSchema, collectionPageSchema } from '../utils/schema.js';
+
+const sorted = alphabetical(brokers);
+const schemas = [
+  collectionPageSchema({
+    title: 'Indian Broker Test - Independent Stock Broker Comparison',
+    description:
+      'Independent, data-driven comparison of Indian stock brokers based only on verifiable published information.',
+    path: '/',
+  }),
+  itemListSchema({ name: 'Indian stock brokers compared', path: '/', items: sorted }),
+];
+
+const guides = [
+  { href: '/best-stock-brokers-in-india/', title: 'Best stock brokers in India', blurb: 'The full comparison: pricing, platforms, APIs and reported execution speed across ' + brokers.length + ' brokers.' },
+  { href: '/fastest-order-execution-brokers-in-india/', title: 'Fastest order execution brokers', blurb: 'Only brokers with a verifiable execution-speed figure - from the independent AlgoTest Broker Speedtest, plus Arrow’s self-reported figure. Brokers without one are left off.' },
+  { href: '/lowest-brokerage-brokers-in-india/', title: 'Lowest brokerage brokers', blurb: 'Delivery, intraday and F&O charges ranked from cheapest, from official pricing pages.' },
+  { href: '/best-trading-apis-in-india/', title: 'Best trading APIs', blurb: 'Every broker with a documented public API, with pricing and official documentation links.' },
+  { href: '/best-brokers-for-algo-trading/', title: 'Best brokers for algo trading', blurb: 'APIs, algo-platform support and execution data for systematic traders.' },
+  { href: '/best-brokers-for-active-traders/', title: 'Best brokers for active traders', blurb: 'Costs and tooling weighed for high-frequency discretionary trading.' },
+];
+---
+
+<BaseLayout
+  title="Indian Broker Test - Independent Stock Broker Comparison (2026)"
+  description="Independent comparison of Indian stock brokers: brokerage, execution speed, APIs and platforms - from verifiable published data only. Unverified figures shown as Not Disclosed."
+  path="/"
+  schemas={schemas}
+>
+  <div class="hero">
+    <p class="eyebrow">Independent · Data-driven · No affiliation</p>
+    <h1>Indian stock brokers, compared on published facts - nothing else.</h1>
+    <p class="standfirst">
+      We compare {brokers.length} Indian brokers using only figures they publish themselves or that
+      appear in top-ranked published comparisons, with a source for every number. When a broker
+      doesn't publish something, we say <span class="nd">Not Disclosed</span> - we never estimate,
+      infer or invent a figure, and no broker gets preferential treatment.
+    </p>
+  </div>
+
+  <ComparisonTable brokers={sorted} caption={`All ${brokers.length} brokers at a glance (alphabetical) - data reviewed ${DATA_COMPILED}`} />
+
+  <h2>Comparison guides</h2>
+  <ul class="card-grid">
+    {guides.map((g) => (
+      <li class="card">
+        <a href={g.href}>{g.title}</a>
+        <p>{g.blurb}</p>
+      </li>
+    ))}
+  </ul>
+
+  <h2>Broker profiles</h2>
+  <ul class="card-grid">
+    {sorted.map((b) => (
+      <li class="card">
+        <a href={`/brokers/${b.slug}/`}>{b.name}</a>
+        <p>{b.type}</p>
+      </li>
+    ))}
+  </ul>
+
+  <p class="disclaimer">
+    Indian Broker Test is an information publication, not investment advice. Brokerage
+    figures exclude statutory charges. Always verify current pricing on the broker's
+    official website - schedules change without notice.
+  </p>
+</BaseLayout>

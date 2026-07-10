@@ -1,0 +1,130 @@
+---
+import ArticleLayout from '../../layouts/ArticleLayout.astro';
+import Faq from '../../components/Faq.astro';
+import SourceList from '../../components/SourceList.astro';
+import { brokers, SOURCES } from '../../data/brokers.js';
+import { nd } from '../../utils/ranking.js';
+import { faqSchema } from '../../utils/schema.js';
+
+export function getStaticPaths() {
+  return brokers.map((b) => ({ params: { slug: b.slug }, props: { broker: b } }));
+}
+
+const { broker: b } = Astro.props;
+const path = `/brokers/${b.slug}/`;
+
+const related = brokers.filter((x) => x.slug !== b.slug).slice(0, 6);
+
+const faqs = [
+  {
+    q: `What brokerage does ${b.name} charge?`,
+    a: b.brokerage.delivery
+      ? `Per its official pricing at our last review: delivery ${b.brokerage.delivery}; intraday ${b.brokerage.intraday}; F&O ${b.brokerage.fno}. Statutory charges apply on top. Verify the current schedule on the official pricing page, as rates change without notice.`
+      : `${b.name} does not publish a brokerage schedule we could verify at review time, so all pricing fields on this page are shown as Not Disclosed. Check the broker's official website for current terms.`,
+  },
+  {
+    q: `Does ${b.name} offer a trading API?`,
+    a: b.api?.available === true
+      ? `Yes - ${b.api.name}. Published pricing: ${b.api.pricing ?? 'Not Disclosed'}. See the official documentation for rate limits and terms.`
+      : `No documented public trading API was found on ${b.name}'s official website at review time, so this is shown as Not Disclosed.`,
+  },
+  {
+    q: `How fast is ${b.name}'s order execution?`,
+    a: b.execSpeed
+      ? `The published figure is ${b.execSpeed.display}${b.execSpeed.selfReported ? ', self-reported by the broker on its own blog' : ', from a published third-party comparison'}. It is approximate, not independently audited, and varies with device, network and market conditions.`
+      : `${b.name} publishes no execution-speed figure that we could verify on its official site or in top-ranked published comparisons, so this metric is shown as Not Disclosed.`,
+  },
+  {
+    q: `Who is ${b.name} best suited for?`,
+    a: b.bestFor,
+  },
+];
+
+const schemas = [faqSchema(faqs)];
+
+const sources = [
+  { label: `${b.name} - official website`, url: b.website },
+  ...(b.pricingUrl && b.pricingUrl !== b.website
+    ? [{ label: `${b.name} - official pricing page`, url: b.pricingUrl }]
+    : []),
+  ...(b.api?.url ? [{ label: `${b.name} - official API page`, url: b.api.url }] : []),
+  ...(b.execSpeed ? [SOURCES[b.execSpeed.sourceId]] : []),
+];
+---
+
+<ArticleLayout
+  title={`${b.name} Review (2026): Brokerage, Platforms, API & Execution - The Published Facts`}
+  metaTitle={`${b.name} Review (2026) - Brokerage, API & Execution Facts`}
+  description={`Independent ${b.name} profile: brokerage charges, platforms, trading API and reported execution speed - sourced from official pages, with unpublished data marked Not Disclosed.`}
+  path={path}
+  eyebrow="Broker profile"
+  standfirst={b.overview}
+  crumbs={[{ name: 'Brokers', path: '/brokers/' }, { name: b.name, path }]}
+  schemas={schemas}
+>
+  <h2>At a glance</h2>
+  <dl class="dl-grid">
+    <dt>Type</dt><dd>{nd(b.type)}</dd>
+    <dt>Official website</dt><dd><a href={b.website} rel="nofollow noopener">{b.website}</a></dd>
+    <dt>Delivery brokerage</dt><dd>{b.brokerage.delivery ?? <span class="nd">Not Disclosed</span>}</dd>
+    <dt>Intraday brokerage</dt><dd>{b.brokerage.intraday ?? <span class="nd">Not Disclosed</span>}</dd>
+    <dt>F&amp;O brokerage</dt><dd>{b.brokerage.fno ?? <span class="nd">Not Disclosed</span>}</dd>
+    <dt>Account opening</dt><dd>{b.accountOpening ?? <span class="nd">Not Disclosed</span>}</dd>
+    <dt>AMC</dt><dd>{b.amc ?? <span class="nd">Not Disclosed</span>}</dd>
+    <dt>Platforms</dt><dd>{b.platforms ? b.platforms.join(', ') : <span class="nd">Not Disclosed</span>}</dd>
+    <dt>Trading API</dt>
+    <dd>
+      {b.api?.available === true
+        ? <>{b.api.name} - {b.api.pricing ?? 'pricing Not Disclosed'} (<a href={b.api.url} rel="nofollow noopener">docs</a>)</>
+        : <span class="nd">Not Disclosed</span>}
+    </dd>
+    <dt>Products</dt><dd>{b.products ? b.products.join(', ') : <span class="nd">Not Disclosed</span>}</dd>
+    <dt>Exchanges</dt><dd>{b.exchanges ? b.exchanges.join(', ') : <span class="nd">Not Disclosed</span>}</dd>
+    <dt>Algo support</dt><dd>{b.algoSupport ?? <span class="nd">Not Disclosed</span>}</dd>
+    <dt>Reported execution speed</dt>
+    <dd>
+      {b.execSpeed
+        ? <>{b.execSpeed.display}{b.execSpeed.selfReported && <span class="badge-self">self-reported</span>}</>
+        : <span class="nd">Not Disclosed</span>}
+    </dd>
+    <dt>Margin</dt><dd>{b.margin ?? <span class="nd">Not Disclosed</span>}</dd>
+    <dt>Research</dt><dd>{b.research ?? <span class="nd">Not Disclosed</span>}</dd>
+  </dl>
+
+  {(b.pros.length > 0 || b.cons.length > 0) && (
+    <div class="pros-cons">
+      <div>
+        <h3>Strengths (published)</h3>
+        {b.pros.length > 0 ? <ul>{b.pros.map((p) => <li>{p}</li>)}</ul> : <p><span class="nd">Not Disclosed</span> - insufficient public data.</p>}
+      </div>
+      <div>
+        <h3>Limitations</h3>
+        {b.cons.length > 0 ? <ul>{b.cons.map((c) => <li>{c}</li>)}</ul> : <p>None documented at review time.</p>}
+      </div>
+    </div>
+  )}
+
+  <h2>Who is it best for?</h2>
+  <p>{b.bestFor}</p>
+
+  <p class="disclaimer">
+    This profile is compiled only from the sources listed below. Fields marked
+    <span class="nd">Not Disclosed</span> mean no verifiable published figure existed at review
+    time - we never estimate or infer. This is information, not investment advice, and this site
+    has no relationship with {b.name}.
+  </p>
+
+  <Faq faqs={faqs} />
+
+  <h2>Related brokers</h2>
+  <ul class="card-grid">
+    {related.map((r) => (
+      <li class="card">
+        <a href={`/brokers/${r.slug}/`}>{r.name}</a>
+        <p>{r.type}</p>
+      </li>
+    ))}
+  </ul>
+
+  <SourceList sources={sources} />
+</ArticleLayout>

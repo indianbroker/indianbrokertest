@@ -1,0 +1,36 @@
+---
+import ArticleLayout from '../layouts/ArticleLayout.astro';
+
+const path = '/about/';
+---
+
+<ArticleLayout
+  title="About Indian Broker Test"
+  metaTitle="About - Indian Broker Test"
+  description="Indian Broker Test is an independent editorial publication comparing Indian stock brokers using only verifiable published information."
+  path={path}
+  eyebrow="About"
+  standfirst="An independent publication with one job: put the published facts about Indian brokers side by side, honestly."
+  crumbs={[{ name: 'About', path }]}
+>
+  <p>
+    Broker comparison in India has a data problem. Most "fastest broker" and "best broker" pages
+    are written by brokers about themselves, filled with unverifiable superlatives, or padded with
+    invented numbers to make tables look complete. Indian Broker Test exists to do the opposite:
+    compare brokers only on what is actually published, cite the source for every figure, and
+    write <span class="nd">Not Disclosed</span> - prominently - wherever the data simply does not
+    exist.
+  </p>
+  <p>
+    The site is static, fast, ad-free at launch (a sidebar slot is reserved for clearly labelled
+    ads in future, and any advertising will never influence data or rankings), and carries no
+    affiliate links. Rankings are computed from the dataset at build time; there is no mechanism
+    to favour any broker, and no broker has any relationship with this publication. The full rules
+    are in the <a href="/methodology/">methodology</a>.
+  </p>
+  <p>
+    Nothing on this site is investment advice. Investments in securities markets are subject to
+    market risks; read all related documents carefully before investing, and verify every figure
+    on the broker's official website before acting on it.
+  </p>
+</ArticleLayout>

@@ -1,0 +1,138 @@
+---
+import ArticleLayout from '../layouts/ArticleLayout.astro';
+import SpeedTable from '../components/SpeedTable.astro';
+import Faq from '../components/Faq.astro';
+import SourceList from '../components/SourceList.astro';
+import { brokers, SOURCES } from '../data/brokers.js';
+import { rankBySpeed } from '../utils/ranking.js';
+import { faqSchema, itemListSchema } from '../utils/schema.js';
+
+const path = '/fastest-order-execution-brokers-in-india/';
+const { ranked, undisclosed } = rankBySpeed(brokers);
+
+// Show the seven fastest brokers with a published figure in one table, and every
+// other tracked broker (any ranked beyond the top seven, plus those with no
+// verifiable figure) in a separate table below.
+const TOP_N = 7;
+const top7 = ranked.slice(0, TOP_N);
+const others = [...ranked.slice(TOP_N), ...undisclosed];
+
+const faqs = [
+  {
+    q: 'Which broker has the fastest published order execution speed in India?',
+    a: 'The lowest raw numbers are all self-reported on the brokers\u2019 own sites \u2014 Arrow (95% of orders under 2.9 ms), Sahi (P95 of 6.61 ms), Fyers (p99 under 7 ms) and Dhan (95% under 25 ms) \u2014 but each measures a different thing (order placement from AWS Mumbai, an internal EMS/processing path, or order-to-exchange), so they are not comparable to one another or to third-party numbers, and only Fyers says its figure was independently audited. Among independently measured brokers in the AlgoTest Broker Speedtest, the fastest sit around 80 ms (median round-trip). Because self-reported and third-party figures use different methodologies, a single definitive "fastest" broker cannot be declared from public data.',
+  },
+  {
+    q: 'Why are only a few brokers on this list?',
+    a: 'The top table shows the seven fastest brokers with a published execution-speed figure \u2014 some measured by the independent AlgoTest Broker Speedtest, plus self-reported figures from Arrow, Sahi, Fyers, Dhan, Groww and Pocketful. A second table lists every remaining broker, whether it has a slower measured figure (Zerodha, Kotak, 5paisa, IIFL, Angel One, Upstox, Finvasia) or no verifiable figure at all. Many Indian brokers publish no comparable latency figure, so rather than invent numbers we show them as Not Disclosed. They still appear in our other comparisons.',
+  },
+  {
+    q: 'How is order execution speed measured?',
+    a: 'It is typically the time from order submission to exchange confirmation, measured in milliseconds. Published figures rarely state their exact methodology (order type, market conditions, network path, percentile used), which is one reason self-reported numbers should be treated as indicative rather than comparable benchmarks.',
+  },
+  {
+    q: 'Does a faster broker guarantee better trading results?',
+    a: 'No. Lower latency can reduce slippage for intraday and options traders, but fill quality, platform stability during volatile sessions, costs and risk management matter as much or more. A few milliseconds rarely decide outcomes for retail delivery investors.',
+  },
+  {
+    q: 'Are these speed figures independently verified?',
+    a: 'Mostly not. The AlgoTest figures are third-party measured but are approximations that vary with device performance, internet speed and market activity. The self-reported figures (Arrow, Sahi, Fyers, Dhan, Groww, Pocketful) are the brokers’ own numbers; of these, only Fyers states that a CISA-certified independent firm audited its figure, and even that measures internal processing rather than a full round-trip. Indian Broker Test has not run its own latency benchmark; if we do in future, the methodology will be published in full.',
+  },
+];
+
+const schemas = [
+  faqSchema(faqs),
+  itemListSchema({ name: 'Fastest order execution brokers in India (by published figures)', path, items: ranked }),
+];
+---
+
+<ArticleLayout
+  title="Fastest Order Execution Brokers in India (2026): Published Speed Figures Compared"
+  metaTitle="Fastest Order Execution Brokers in India (2026) - Published Speeds Compared"
+  description="Which Indian broker executes orders fastest? We rank only brokers with published execution-speed figures - sourced and cited. Brokers without published data are shown as Not Disclosed."
+  path={path}
+  eyebrow="Speed comparison"
+  standfirst="Execution speed is the most marketed and least documented metric in Indian broking. Here is what is actually published - ranked, sourced, and honestly labelled where the data simply doesn't exist."
+  crumbs={[{ name: 'Fastest order execution brokers', path }]}
+  schemas={schemas}
+>
+  <SpeedTable brokers={top7} showUndisclosed={false} strictOrder={true} caption="Top 7 fastest order execution brokers in India - by published figures" />
+
+  <h2>How to read these tables</h2>
+  <p>
+    The table above lists the seven fastest brokers for which we could find a published
+    execution-speed figure. These come from two kinds of source. Some are third-party measured by
+    the independent AlgoTest Broker Speedtest (a live tool that fires real orders and records
+    place-order latency, refreshed every 15 minutes). The rest are self-reported by the brokers
+    themselves - Arrow, Sahi, Fyers, Dhan, Groww and Pocketful each publish a figure on their own
+    site. The second table lower down holds every other broker we track: a few with a slower measured
+    figure, and the majority with no verifiable figure at all, shown as Not Disclosed.
+  </p>
+  <p>
+    The AlgoTest medians are consistent with the raw 15-minute place-order measurements we reviewed
+    for this update (Zerodha ≈ 80 ms, Kotak ≈ 80 ms, 5paisa ≈ 85 ms, IIFL ≈ 95 ms, Angel One ≈ 95
+    ms, Upstox ≈ 135 ms, Finvasia/Shoonya ≈ 140 ms) and are third-party measured round-trips. The self-reported figures are <em>not</em> directly
+    comparable, either to those medians or to each other, because they measure different things:
+    Arrow (95% under 2.9 ms) times orders placed from the AWS Mumbai region; Sahi (P95 6.61 ms) and
+    Fyers (p99 under 7 ms) time their own internal EMS/processing path rather than a full client
+    round-trip; Dhan (95% under 25 ms) measures order-to-exchange; and Groww (“sub-50ms”) and
+    Pocketful (“under 50 ms”) publish no methodology at all. Only Fyers says it has had its figure
+    independently audited. Treat every self-reported number as indicative marketing rather than an
+    apples-to-apples benchmark.
+  </p>
+
+  <h2>What actually determines execution speed</h2>
+  <p>
+    Beyond the broker's order-management and risk-management systems, execution time depends on
+    server location and co-location, whether the platform uses WebSocket or REST connections, the
+    broker's network capacity under load, your own internet connection and device, market
+    volatility, and the order type - market orders confirm faster than complex conditional orders.
+    Two traders at the same broker can see meaningfully different latencies.
+  </p>
+
+  <h2>Broker-by-broker: what is published</h2>
+  {ranked.map((b, i) => (
+    <>
+      <h3>{i + 1}. {b.name}: {b.execSpeed.display}</h3>
+      <p>{b.overview} <a href={`/brokers/${b.slug}/`}>Full {b.name} profile →</a></p>
+    </>
+  ))}
+
+  <h3>All other tracked brokers</h3>
+  <p>
+    This table holds every broker outside the top seven. The first rows are brokers with a published
+    figure that simply ranks slower - all third-party measured by the AlgoTest Broker Speedtest. The rest publish no
+    execution-speed figure we could verify (we searched official sites, blogs and the AlgoTest Broker
+    Speedtest), so we show them as Not Disclosed rather than assign invented milliseconds. Some market
+    vague speed claims - for example ICICI Direct mentions “milliseconds” without a verifiable
+    figure - which we deliberately do not rank. This is not a judgement on their actual speed;
+    several are among India's largest and most technically capable brokers. If a verifiable figure
+    appears for any of them, it will be added on the next review.
+  </p>
+
+  <SpeedTable brokers={others} showUndisclosed={true} caption="All other tracked brokers - slower published figures and brokers with no verifiable figure" />
+
+  <h2>Conclusion</h2>
+  <p>
+    On published data alone, the ranking above is the most defensible answer available to "which
+    Indian broker is fastest" - and it is a thin answer, resting on approximate, unaudited figures.
+    If execution speed is critical to your strategy, test it yourself with small live orders during
+    the market conditions you actually trade in, and weigh stability during volatile sessions at
+    least as heavily as headline milliseconds.
+  </p>
+
+  <Faq faqs={faqs} />
+
+  <SourceList
+    sources={[
+      SOURCES['algotest-speed'],
+      SOURCES['arrow-official'],
+      SOURCES['sahi-official'],
+      SOURCES['fyers-official'],
+      SOURCES['dhan-official'],
+      SOURCES['groww-official'],
+      SOURCES['pocketful-official'],
+      { label: 'Official broker websites and pricing pages (linked in each broker profile)', url: 'https://www.indianbrokertest.in/brokers/' },
+    ]}
+  />
+</ArticleLayout>
