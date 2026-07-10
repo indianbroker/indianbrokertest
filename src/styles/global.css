@@ -12,7 +12,7 @@
   --rule: #dcdfd8;
   --green: #0c6b4d;
   --green-dim: #e6f1ec;
-  --amber: #479d0e;
+  --amber: #255307;
   --amber-dim: #f4f8f2;
   --serif: Charter, 'Bitstream Charter', 'Sitka Text', Cambria, Georgia, serif;
   --sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
@@ -234,7 +234,7 @@ td:first-child, th:first-child { padding-left: 0.4rem; }
   letter-spacing: 0.04em;
   color: var(--amber);
   background: var(--amber-dim);
-  border: 1px solid #cde2c0;
+  border: 1px solid #317606;
   padding: 0.05rem 0.45rem;
   border-radius: 2px;
   white-space: nowrap;
