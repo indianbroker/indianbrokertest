@@ -22,6 +22,8 @@ export function organizationSchema() {
     '@type': 'Organization',
     name: SITE_NAME,
     url: SITE + '/',
+    logo: SITE + '/favicon.svg',
+    email: 'indianbrokertest@gmail.com',
     description:
       'An independent editorial publication comparing Indian stock brokers. Not affiliated with, sponsored by, or endorsed by any broker.',
   };

@@ -11,6 +11,7 @@ const {
   published,
   modified,
   image = '/og-default.png',
+  noindex = false,
 } = Astro.props;
 
 const SITE = 'https://www.indianbrokertest.com';
@@ -38,12 +39,13 @@ const currentPath = Astro.url.pathname;
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
-    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+    <meta name="robots" content={noindex ? 'noindex, follow' : 'index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1'} />
     <meta name="color-scheme" content="light" />
     <meta name="theme-color" content="#0c6b4d" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="sitemap" href="/sitemap-index.xml" />
     <link rel="alternate" type="application/rss+xml" title="Indian Broker Test" href="/rss.xml" />
+    <link rel="alternate" type="text/plain" href="/llms.txt" title="LLM-friendly site summary" />
 
     <!-- Open Graph -->
     <meta property="og:type" content={ogType} />

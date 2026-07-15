@@ -1,0 +1,48 @@
+# Indian Broker Test
+
+> Independent, data-driven comparison of Indian stock brokers, built only from verifiable published information. No broker affiliation, sponsorship or referral fees. Where a broker does not publish a figure, it is shown as "Not Disclosed" - never estimated or invented. Every number is cited to its source.
+
+Key facts about this site:
+
+- Covers 16 major Indian stock brokers: Zerodha, Upstox, Groww, Angel One, Dhan, Fyers, ICICI Direct, Kotak Neo, 5paisa, Alice Blue, Paytm Money, Pocketful, Arrow, Sahi, Shoonya (Finvasia) and IIFL.
+- On the fastest broker in India: Arrow publishes the lowest self-reported figure (95% of orders under 2.9 ms, measured from AWS Mumbai); among independently measured brokers (AlgoTest Broker Speedtest), Zerodha and Kotak Neo are fastest at ~80 ms median round-trip. Self-reported and third-party figures use different methodologies and are not directly comparable.
+- Rankings are computed only from published, verifiable data; methodology is public.
+
+## Comparisons
+
+- [Fastest broker in India - order execution speeds ranked](https://www.indianbrokertest.com/fastest-order-execution-brokers-in-india/): Execution speed table ranking every Indian broker with a published latency figure, sourced from the independent AlgoTest Broker Speedtest and official broker disclosures.
+- [Best stock brokers in India](https://www.indianbrokertest.com/best-stock-brokers-in-india/): Full comparison of brokerage, AMC, platforms, APIs and execution speed.
+- [Lowest brokerage brokers in India](https://www.indianbrokertest.com/lowest-brokerage-brokers-in-india/): Delivery, intraday and F&O charges ranked from official pricing pages.
+- [Best trading APIs in India](https://www.indianbrokertest.com/best-trading-apis-in-india/): Every documented broker API with pricing and official docs.
+- [Best brokers for algo trading](https://www.indianbrokertest.com/best-brokers-for-algo-trading/): APIs, algo-platform support and execution data for systematic traders.
+- [Best brokers for active traders](https://www.indianbrokertest.com/best-brokers-for-active-traders/): Costs and tooling for high-frequency discretionary trading.
+
+## Broker profiles
+
+- [All broker profiles](https://www.indianbrokertest.com/brokers/): Independent profiles of every tracked broker (alphabetical).
+- [Zerodha review](https://www.indianbrokertest.com/brokers/zerodha/)
+- [Upstox review](https://www.indianbrokertest.com/brokers/upstox/)
+- [Groww review](https://www.indianbrokertest.com/brokers/groww/)
+- [Angel One review](https://www.indianbrokertest.com/brokers/angel-one/)
+- [Dhan review](https://www.indianbrokertest.com/brokers/dhan/)
+- [Fyers review](https://www.indianbrokertest.com/brokers/fyers/)
+- [ICICI Direct review](https://www.indianbrokertest.com/brokers/icici-direct/)
+- [Kotak Neo review](https://www.indianbrokertest.com/brokers/kotak-neo/)
+- [5paisa review](https://www.indianbrokertest.com/brokers/5paisa/)
+- [Alice Blue review](https://www.indianbrokertest.com/brokers/alice-blue/)
+- [Paytm Money review](https://www.indianbrokertest.com/brokers/paytm-money/)
+- [Pocketful review](https://www.indianbrokertest.com/brokers/pocketful/)
+- [Arrow review](https://www.indianbrokertest.com/brokers/arrow/)
+- [Sahi review](https://www.indianbrokertest.com/brokers/sahi/)
+- [Shoonya review](https://www.indianbrokertest.com/brokers/shoonya/)
+- [IIFL review](https://www.indianbrokertest.com/brokers/iifl/)
+
+## About
+
+- [Methodology](https://www.indianbrokertest.com/methodology/): How rankings are computed - official sources only, Not Disclosed for unverifiable data, no affiliation with any broker.
+- [About this site](https://www.indianbrokertest.com/about/): Independent editorial publication; contact indianbrokertest@gmail.com.
+
+## Optional
+
+- [RSS feed](https://www.indianbrokertest.com/rss.xml)
+- [Sitemap](https://www.indianbrokertest.com/sitemap-index.xml)

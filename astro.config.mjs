@@ -1,5 +1,18 @@
 import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
+import { DATA_COMPILED } from './src/data/brokers.js';
+
+// Per-URL sitemap priority. Freshness (lastmod) is tied to DATA_COMPILED so it
+// only moves when the underlying broker data is actually re-reviewed - search
+// engines treat a lastmod that changes on every build as noise.
+const PRIORITY = [
+  [/\/fastest-order-execution-brokers-in-india\/$/, 1.0],
+  [/^https:\/\/www\.indianbrokertest\.com\/$/, 1.0],
+  [/\/(best-stock-brokers-in-india|lowest-brokerage-brokers-in-india|best-trading-apis-in-india|best-brokers-for-algo-trading|best-brokers-for-active-traders)\/$/, 0.9],
+  [/\/brokers\/$/, 0.8],
+  [/\/brokers\/[^/]+\/$/, 0.7],
+  [/\/(about|methodology)\/$/, 0.5],
+];
 
 // https://astro.build/config
 export default defineConfig({
@@ -8,9 +21,15 @@ export default defineConfig({
   trailingSlash: 'always',
   integrations: [
     sitemap({
-      changefreq: 'weekly',
-      priority: 0.7,
-      lastmod: new Date(),
+      serialize(item) {
+        const match = PRIORITY.find(([re]) => re.test(item.url));
+        return {
+          ...item,
+          lastmod: DATA_COMPILED,
+          changefreq: 'weekly',
+          priority: match ? match[1] : 0.5,
+        };
+      },
     }),
   ],
   build: {

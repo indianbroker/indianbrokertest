@@ -19,7 +19,7 @@ const others = [...ranked.slice(TOP_N), ...undisclosed];
 
 const faqs = [
   {
-    q: 'Which broker has the fastest published order execution speed in India?',
+    q: 'Which is the fastest broker in India by published order execution speed?',
     a: 'The lowest raw numbers are all self-reported on the brokers\u2019 own sites \u2014 Arrow (95% of orders under 2.9 ms), Sahi (P95 of 6.61 ms), Fyers (p99 under 7 ms) and Dhan (95% under 25 ms) \u2014 but each measures a different thing (order placement from AWS Mumbai, an internal EMS/processing path, or order-to-exchange), so they are not comparable to one another or to third-party numbers, and only Fyers says its figure was independently audited. Among independently measured brokers in the AlgoTest Broker Speedtest, the fastest sit around 80 ms (median round-trip). Because self-reported and third-party figures use different methodologies, a single definitive "fastest" broker cannot be declared from public data.',
   },
   {
@@ -47,12 +47,12 @@ const schemas = [
 ---
 
 <ArticleLayout
-  title="Fastest Order Execution Brokers in India (2026): Published Speed Figures Compared"
-  metaTitle="Fastest Order Execution Brokers in India (2026)"
-  description="Which Indian broker executes orders fastest? We rank only brokers with published execution-speed figures - sourced and cited. Brokers without published data are shown as Not Disclosed."
+  title="Fastest Broker in India (2026): Order Execution Speeds Ranked by Published Figures"
+  metaTitle="Fastest Broker in India (2026): Execution Speeds Ranked"
+  description="Which is the fastest broker in India? Order execution speeds ranked from published, cited figures. Brokers with no published data are marked Not Disclosed."
   path={path}
   eyebrow="Speed comparison"
-  standfirst="Execution speed is the most marketed and least documented metric in Indian broking. Here is what is actually published - ranked, sourced, and honestly labelled where the data simply doesn't exist."
+  standfirst="Looking for the fastest broker in India? Execution speed is the most marketed and least documented metric in Indian broking. Here is what is actually published - ranked, sourced, and honestly labelled where the data simply doesn't exist."
   crumbs={[{ name: 'Fastest order execution brokers', path }]}
   schemas={schemas}
 >
