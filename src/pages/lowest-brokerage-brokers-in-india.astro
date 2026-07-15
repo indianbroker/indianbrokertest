@@ -3,25 +3,27 @@ import ArticleLayout from '../layouts/ArticleLayout.astro';
 import Faq from '../components/Faq.astro';
 import SourceList from '../components/SourceList.astro';
 import { brokers } from '../data/brokers.js';
-import { rankByFee, parseFee } from '../utils/ranking.js';
+import { rankByFee, parseFee, alphabetical } from '../utils/ranking.js';
 import { faqSchema, itemListSchema } from '../utils/schema.js';
 
 const path = '/lowest-brokerage-brokers-in-india/';
+// The table lists all brokers alphabetically; rankByFee is still used to name
+// the cheapest published pricing in the copy and FAQ below.
+const listed = alphabetical(brokers);
 const delivery = rankByFee(brokers, 'delivery');
-const intraday = rankByFee(brokers, 'intraday');
 
 const faqs = [
   {
     q: 'Which broker has the lowest brokerage in India?',
-    a: `On published headline pricing, ${delivery.ranked[0].name} is the cheapest, advertising zero brokerage across segments - statutory charges still apply. Several brokers (Zerodha, Dhan, Fyers) offer free equity delivery with flat ₹20-or-lower derivatives pricing. Brokers with plan-based pricing cannot be ranked on a single number and are listed separately.`,
+    a: `On published headline pricing, ${delivery.ranked[0].name} is the cheapest, advertising zero brokerage across segments - statutory charges still apply. Several brokers (Zerodha, Dhan, Fyers) offer free equity delivery with flat ₹20-or-lower derivatives pricing. Brokers with plan-based pricing cannot be reduced to a single number and are shown as Not Disclosed with links to their official rate cards.`,
   },
   {
     q: 'Is zero brokerage really free trading?',
     a: 'No. Zero brokerage means the broker charges no commission, but every trade still incurs statutory and exchange charges - STT/CTT, exchange transaction fees, SEBI fees, GST and stamp duty. Zero-brokerage brokers earn revenue from other sources such as float income and value-added services.',
   },
   {
-    q: 'Why are some brokers not ranked on this page?',
-    a: 'Brokers with plan-based or variable pricing (for example bank-backed full-service brokers) do not publish a single flat figure that can be fairly compared with flat-fee brokers, so they are listed separately with links to their official rate cards rather than being forced into the ranking.',
+    q: 'Why do some brokers show Not Disclosed instead of a charge?',
+    a: 'Brokers with plan-based or variable pricing (for example bank-backed full-service brokers) do not publish a single flat figure that can be fairly compared with flat-fee brokers, so those cells show Not Disclosed with a link to the official rate card rather than a guessed number.',
   },
   {
     q: 'Do lower charges mean a better broker?',
@@ -31,31 +33,31 @@ const faqs = [
 
 const schemas = [
   faqSchema(faqs),
-  itemListSchema({ name: 'Lowest brokerage brokers in India (by published delivery pricing)', path, items: delivery.ranked }),
+  itemListSchema({ name: 'Lowest brokerage brokers in India (published pricing, alphabetical)', path, items: listed }),
 ];
 
 const fee = (b, f) => b.brokerage?.[f] ?? null;
 ---
 
 <ArticleLayout
-  title="Lowest Brokerage Brokers in India (2026): Delivery, Intraday & F&O Charges Ranked"
-  metaTitle="Lowest Brokerage Brokers in India (2026) - Charges Ranked"
-  description="Indian brokers ranked by published brokerage: delivery, intraday and F&O charges from official pricing pages. Plan-based pricing listed separately."
+  title="Lowest Brokerage Brokers in India (2026): Delivery, Intraday & F&O Charges Compared"
+  metaTitle="Lowest Brokerage Brokers in India (2026) - Charges Compared"
+  description="Published brokerage of Indian brokers, listed alphabetically: delivery, intraday and F&O charges from official pricing pages. Gaps marked Not Disclosed."
   path={path}
   eyebrow="Cost comparison"
-  standfirst="Headline brokerage from official pricing pages, ranked cheapest-first - with plan-based brokers separated out instead of squeezed into a fake single number."
+  standfirst="Headline brokerage from official pricing pages, listed alphabetically - with plan-based pricing linked to its official rate card instead of squeezed into a fake single number."
   crumbs={[{ name: 'Lowest brokerage brokers', path }]}
   schemas={schemas}
 >
-  <h2>Equity delivery - ranked by published charge</h2>
+  <h2>Published brokerage by broker (alphabetical)</h2>
   <div class="table-wrap">
     <table>
-      <caption>Delivery brokerage, cheapest first (official pricing pages)</caption>
+      <caption>Delivery, intraday and F&amp;O brokerage by broker, alphabetical (official pricing pages)</caption>
       <thead>
         <tr><th scope="col">S.No</th><th scope="col">Broker</th><th scope="col">Delivery charge</th><th scope="col">Intraday</th><th scope="col">F&amp;O</th><th scope="col">Source</th></tr>
       </thead>
       <tbody>
-        {delivery.ranked.map((b, i) => (
+        {listed.map((b, i) => (
           <tr>
             <td class="tnum">{i + 1}</td>
             <td><a href={`/brokers/${b.slug}/`}>{b.name}</a></td>
@@ -65,34 +67,24 @@ const fee = (b, f) => b.brokerage?.[f] ?? null;
             <td><a href={b.pricingUrl} rel="nofollow noopener">Official</a></td>
           </tr>
         ))}
-        {delivery.undisclosed.map((b) => (
-          <tr>
-            <td class="tnum">-</td>
-            <td><a href={`/brokers/${b.slug}/`}>{b.name}</a></td>
-            <td>{fee(b, 'delivery') ? fee(b, 'delivery') : <span class="nd">Not Disclosed</span>}</td>
-            <td>{fee(b, 'intraday') ?? <span class="nd">Not Disclosed</span>}</td>
-            <td>{fee(b, 'fno') ?? <span class="nd">Not Disclosed</span>}</td>
-            <td><a href={b.pricingUrl} rel="nofollow noopener">Official</a></td>
-          </tr>
-        ))}
       </tbody>
     </table>
   </div>
   <p class="table-note">
-    Ranked rows have a flat published figure. Unranked rows have plan-based, variable or
-    unpublished pricing - see the official rate card. All figures exclude statutory charges.
+    Brokers are listed alphabetically, not ranked. Cells showing Not Disclosed have plan-based,
+    variable or unpublished pricing - see the official rate card. All figures exclude statutory charges.
   </p>
 
-  <h2>What the ranking shows</h2>
+  <h2>What the published charges show</h2>
   <p>
-    {delivery.ranked[0].name} tops the delivery ranking with published zero brokerage across
+    {delivery.ranked[0].name} publishes the lowest headline pricing, with zero brokerage across
     segments. A cluster of flat-fee brokers - {delivery.ranked
       .filter((b) => parseFee(b.brokerage.delivery) === 0 && b.slug !== delivery.ranked[0].slug)
       .map((b) => b.name)
       .join(', ')} - also charge nothing on delivery while capping intraday and F&O at ₹20 or less
     per order. The remaining flat-fee brokers charge up to ₹20 on delivery too. For the
     plan-based brokers, cost depends entirely on the plan you pick and your volumes, which is why
-    they sit outside the ranking rather than inside it with a guessed number.
+    their cells show Not Disclosed rather than a guessed number.
   </p>
 
   <h2>Charges beyond brokerage</h2>

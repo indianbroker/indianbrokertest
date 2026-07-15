@@ -12,7 +12,7 @@ Key facts about this site:
 
 - [Fastest broker in India - order execution speeds ranked](https://www.indianbrokertest.com/fastest-order-execution-brokers-in-india/): Execution speed table ranking every Indian broker with a published latency figure, sourced from the independent AlgoTest Broker Speedtest and official broker disclosures.
 - [Best stock brokers in India](https://www.indianbrokertest.com/best-stock-brokers-in-india/): Full comparison of brokerage, AMC, platforms, APIs and execution speed.
-- [Lowest brokerage brokers in India](https://www.indianbrokertest.com/lowest-brokerage-brokers-in-india/): Delivery, intraday and F&O charges ranked from official pricing pages.
+- [Lowest brokerage brokers in India](https://www.indianbrokertest.com/lowest-brokerage-brokers-in-india/): Delivery, intraday and F&O charges for every tracked broker, from official pricing pages.
 - [Best trading APIs in India](https://www.indianbrokertest.com/best-trading-apis-in-india/): Every documented broker API with pricing and official docs.
 - [Best brokers for algo trading](https://www.indianbrokertest.com/best-brokers-for-algo-trading/): APIs, algo-platform support and execution data for systematic traders.
 - [Best brokers for active traders](https://www.indianbrokertest.com/best-brokers-for-active-traders/): Costs and tooling for high-frequency discretionary trading.
