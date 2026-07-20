@@ -8,11 +8,7 @@
     "build": "astro build",
     "preview": "astro preview",
     "test": "node --test src/utils/brokerageCalc.test.js",
-    "indexnow": "node scripts/indexnow.mjs",
-    "deploy": "pnpm run build && wrangler deploy"
-  },
-  "devDependencies": {
-    "wrangler": "^4.112.0"
+    "indexnow": "node scripts/indexnow.mjs"
   },
   "dependencies": {
     "@astrojs/rss": "^4.0.11",
