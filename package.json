@@ -1,5 +1,5 @@
 {
-  "name": "indian-broker-test",
+  "name": "indian-broker-test-site",
   "type": "module",
   "version": "1.0.0",
   "description": "Independent, data-driven comparison of Indian stock brokers. Static, fast, ad-free editorial site built with Astro.",
