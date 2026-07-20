@@ -1,0 +1,123 @@
+---
+import ArticleLayout from '../../layouts/ArticleLayout.astro';
+import VsTable from '../../components/VsTable.astro';
+import Faq from '../../components/Faq.astro';
+import SourceList from '../../components/SourceList.astro';
+import { brokers } from '../../data/brokers.js';
+import { calculatorPath } from '../../data/brokerage-rules.js';
+import {
+  getAllPairs,
+  parsePairSlug,
+  pairPath,
+  relatedPairs,
+  editorialNote,
+} from '../../utils/comparisons.js';
+import { faqSchema } from '../../utils/schema.js';
+
+const allPairs = getAllPairs(brokers);
+
+export function getStaticPaths() {
+  const pairs = getAllPairs(brokers);
+  return pairs.map(({ a, b, slug }) => ({
+    params: { pair: slug },
+    props: { a, b, slug },
+  }));
+}
+
+const { a, b, slug } = Astro.props;
+const path = pairPath(a, b);
+
+const faqs = [
+  {
+    q: `${a.name} vs ${b.name}: which has lower delivery brokerage?`,
+    a: `At our last review, ${a.name} published delivery brokerage as "${a.brokerage?.delivery ?? 'Not Disclosed'}" and ${b.name} as "${b.brokerage?.delivery ?? 'Not Disclosed'}". Plan-based or percentage pricing cannot always be reduced to a single winner — use the official pricing pages linked below.`,
+  },
+  {
+    q: `Does ${a.name} or ${b.name} have a trading API?`,
+    a:
+      a.api?.available && b.api?.available
+        ? `Both have documented APIs at review time: ${a.name} (${a.api.name}), ${b.name} (${b.api.name}). Compare pricing and rate limits on each broker's developer page.`
+        : a.api?.available
+          ? `${a.name} has a documented API (${a.api.name}). ${b.name} had no verifiable public API on its official site at review time.`
+          : b.api?.available
+            ? `${b.name} has a documented API (${b.api.name}). ${a.name} had no verifiable public API on its official site at review time.`
+            : `Neither broker had a verifiable public trading API on official pages at review time, or both are marked Not Disclosed.`,
+  },
+  {
+    q: `Which is faster — ${a.name} or ${b.name}?`,
+    a:
+      a.execSpeed && b.execSpeed
+        ? `${a.name} publishes ${a.execSpeed.display}; ${b.name} publishes ${b.execSpeed.display}. Sources and methodologies differ (including self-reported vs third-party figures) — they are not directly comparable without reading each source.`
+        : a.execSpeed
+          ? `${a.name} publishes ${a.execSpeed.display}. ${b.name} has no verifiable execution-speed figure we could cite.`
+          : b.execSpeed
+            ? `${b.name} publishes ${b.execSpeed.display}. ${a.name} has no verifiable execution-speed figure we could cite.`
+            : `Neither broker publishes a verifiable execution-speed figure we could cite at review time.`,
+  },
+  {
+    q: 'Are these comparisons independent?',
+    a: 'Yes. Indian Broker Test is not affiliated with, sponsored by, or endorsed by any broker. Rankings and comparisons use only published official data; gaps are shown as Not Disclosed.',
+  },
+];
+
+const sources = [
+  { label: `${a.name} - official website`, url: a.website },
+  ...(a.pricingUrl && a.pricingUrl !== a.website
+    ? [{ label: `${a.name} - official pricing`, url: a.pricingUrl }]
+    : []),
+  { label: `${b.name} - official website`, url: b.website },
+  ...(b.pricingUrl && b.pricingUrl !== b.website
+    ? [{ label: `${b.name} - official pricing`, url: b.pricingUrl }]
+    : []),
+];
+
+const related = relatedPairs(allPairs, slug);
+const note = editorialNote(a, b);
+
+const schemas = [faqSchema(faqs)];
+---
+
+<ArticleLayout
+  title={`${a.name} vs ${b.name} (2026): Brokerage, API, AMC & Execution Compared`}
+  metaTitle={`${a.name} vs ${b.name} (2026) — Indian Broker Comparison`}
+  description={`${a.name} vs ${b.name}: delivery, intraday and F&O brokerage, AMC, trading API and reported execution speed compared from official published data.`}
+  path={path}
+  eyebrow="Broker comparison"
+  standfirst={`Side-by-side comparison of ${a.name} and ${b.name} from published official pricing and features — no affiliation with either broker.`}
+  crumbs={[
+    { name: 'Broker comparisons', path: '/vs/' },
+    { name: `${a.name} vs ${b.name}`, path },
+  ]}
+  schemas={schemas}
+>
+  <VsTable a={a} b={b} />
+
+  <h2>What the published data shows</h2>
+  <p>{note}</p>
+
+  <h2>Tools &amp; profiles</h2>
+  <ul>
+    <li><a href={`/brokers/${a.slug}/`}>{a.name} full profile</a></li>
+    <li><a href={`/brokers/${b.slug}/`}>{b.name} full profile</a></li>
+    <li><a href={calculatorPath(a.slug)}>{a.name} brokerage calculator</a></li>
+    <li><a href={calculatorPath(b.slug)}>{b.name} brokerage calculator</a></li>
+    <li><a href="/lowest-brokerage-brokers-in-india/">Lowest brokerage brokers in India</a></li>
+    <li><a href="/vs/">All broker comparisons</a></li>
+  </ul>
+
+  {related.length > 0 && (
+    <>
+      <h2>Related comparisons</h2>
+      <ul class="card-grid">
+        {related.map((p) => (
+          <li class="card">
+            <a href={pairPath(p.a, p.b)}>{p.a.name} vs {p.b.name}</a>
+          </li>
+        ))}
+      </ul>
+    </>
+  )}
+
+  <Faq faqs={faqs} />
+  <SourceList sources={sources} />
+</ArticleLayout>

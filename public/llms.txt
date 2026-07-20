@@ -10,6 +10,14 @@ Key facts about this site:
 
 ## Comparisons
 
+- [Broker comparisons hub (head-to-head)](https://www.indianbrokertest.com/vs/): Every tracked broker compared pairwise — 120 unique pairs covering Zerodha vs Upstox, Groww vs Dhan, Angel One vs Zerodha and more.
+- [Zerodha vs Upstox](https://www.indianbrokertest.com/vs/upstox-vs-zerodha/)
+- [Zerodha vs Groww](https://www.indianbrokertest.com/vs/groww-vs-zerodha/)
+- [Zerodha vs Dhan](https://www.indianbrokertest.com/vs/dhan-vs-zerodha/)
+- [Upstox vs Groww](https://www.indianbrokertest.com/vs/groww-vs-upstox/)
+- [Upstox vs Dhan](https://www.indianbrokertest.com/vs/dhan-vs-upstox/)
+- [Groww vs Dhan](https://www.indianbrokertest.com/vs/dhan-vs-groww/)
+- [Angel One vs Zerodha](https://www.indianbrokertest.com/vs/angel-one-vs-zerodha/)
 - [Fastest broker in India - order execution speeds ranked](https://www.indianbrokertest.com/fastest-order-execution-brokers-in-india/): Execution speed table ranking every Indian broker with a published latency figure, sourced from the independent AlgoTest Broker Speedtest and official broker disclosures.
 - [Best stock brokers in India](https://www.indianbrokertest.com/best-stock-brokers-in-india/): Full comparison of brokerage, AMC, platforms, APIs and execution speed.
 - [Lowest brokerage brokers in India](https://www.indianbrokertest.com/lowest-brokerage-brokers-in-india/): Delivery, intraday and F&O charges for every tracked broker, from official pricing pages.

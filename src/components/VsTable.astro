@@ -1,0 +1,113 @@
+---
+/**
+ * Side-by-side broker comparison table (two brokers).
+ */
+const { a, b } = Astro.props;
+---
+
+<div class="table-wrap">
+  <table>
+    <caption>
+      {a.name} vs {b.name} — published pricing and features (official sources at last review)
+    </caption>
+    <thead>
+      <tr>
+        <th scope="col">Metric</th>
+        <th scope="col"><a href={`/brokers/${a.slug}/`}>{a.name}</a></th>
+        <th scope="col"><a href={`/brokers/${b.slug}/`}>{b.name}</a></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th scope="row">Delivery brokerage</th>
+        <td>{a.brokerage?.delivery ?? <span class="nd">Not Disclosed</span>}</td>
+        <td>{b.brokerage?.delivery ?? <span class="nd">Not Disclosed</span>}</td>
+      </tr>
+      <tr>
+        <th scope="row">Intraday brokerage</th>
+        <td>{a.brokerage?.intraday ?? <span class="nd">Not Disclosed</span>}</td>
+        <td>{b.brokerage?.intraday ?? <span class="nd">Not Disclosed</span>}</td>
+      </tr>
+      <tr>
+        <th scope="row">F&amp;O brokerage</th>
+        <td>{a.brokerage?.fno ?? <span class="nd">Not Disclosed</span>}</td>
+        <td>{b.brokerage?.fno ?? <span class="nd">Not Disclosed</span>}</td>
+      </tr>
+      <tr>
+        <th scope="row">AMC</th>
+        <td>{a.amc ?? <span class="nd">Not Disclosed</span>}</td>
+        <td>{b.amc ?? <span class="nd">Not Disclosed</span>}</td>
+      </tr>
+      <tr>
+        <th scope="row">Account opening</th>
+        <td>{a.accountOpening ?? <span class="nd">Not Disclosed</span>}</td>
+        <td>{b.accountOpening ?? <span class="nd">Not Disclosed</span>}</td>
+      </tr>
+      <tr>
+        <th scope="row">Trading API</th>
+        <td>
+          {a.api?.available === true ? (
+            <>
+              {a.api.name}
+              {a.api.pricing ? ` — ${a.api.pricing}` : ''}
+            </>
+          ) : (
+            <span class="nd">Not Disclosed</span>
+          )}
+        </td>
+        <td>
+          {b.api?.available === true ? (
+            <>
+              {b.api.name}
+              {b.api.pricing ? ` — ${b.api.pricing}` : ''}
+            </>
+          ) : (
+            <span class="nd">Not Disclosed</span>
+          )}
+        </td>
+      </tr>
+      <tr>
+        <th scope="row">Reported execution speed</th>
+        <td>
+          {a.execSpeed ? (
+            <>
+              {a.execSpeed.display}
+              {a.execSpeed.selfReported && <span class="badge-self">self-reported</span>}
+            </>
+          ) : (
+            <span class="nd">Not Disclosed</span>
+          )}
+        </td>
+        <td>
+          {b.execSpeed ? (
+            <>
+              {b.execSpeed.display}
+              {b.execSpeed.selfReported && <span class="badge-self">self-reported</span>}
+            </>
+          ) : (
+            <span class="nd">Not Disclosed</span>
+          )}
+        </td>
+      </tr>
+      <tr>
+        <th scope="row">Algo support</th>
+        <td>{a.algoSupport ?? <span class="nd">Not Disclosed</span>}</td>
+        <td>{b.algoSupport ?? <span class="nd">Not Disclosed</span>}</td>
+      </tr>
+      <tr>
+        <th scope="row">Platforms</th>
+        <td>{a.platforms ? a.platforms.join(', ') : <span class="nd">Not Disclosed</span>}</td>
+        <td>{b.platforms ? b.platforms.join(', ') : <span class="nd">Not Disclosed</span>}</td>
+      </tr>
+      <tr>
+        <th scope="row">Best for (published)</th>
+        <td>{a.bestFor}</td>
+        <td>{b.bestFor}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<p class="table-note">
+  Statutory charges (STT, exchange fees, GST, etc.) are not included. Figures are from official
+  pricing pages at our last review — verify before opening an account.
+</p>

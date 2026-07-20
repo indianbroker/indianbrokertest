@@ -9,6 +9,8 @@ const PRIORITY = [
   [/\/fastest-order-execution-brokers-in-india\/$/, 1.0],
   [/^https:\/\/www\.indianbrokertest\.com\/$/, 1.0],
   [/\/(best-stock-brokers-in-india|lowest-brokerage-brokers-in-india|best-trading-apis-in-india|best-brokers-for-algo-trading|best-brokers-for-active-traders)\/$/, 0.9],
+  [/\/vs\/$/, 0.9],
+  [/\/vs\/[^/]+\/$/, 0.88],
   [/\/brokerage-calculators\/$/, 0.88],
   [/-brokerage-calculator\/$/, 0.85],
   [/\/brokers\/$/, 0.8],

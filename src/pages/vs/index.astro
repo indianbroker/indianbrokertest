@@ -1,0 +1,116 @@
+---
+import ArticleLayout from '../../layouts/ArticleLayout.astro';
+import Faq from '../../components/Faq.astro';
+import { brokers } from '../../data/brokers.js';
+import { alphabetical } from '../../utils/ranking.js';
+import {
+  getAllPairs,
+  sortPairsForHub,
+  pairPath,
+  pairBlurb,
+} from '../../utils/comparisons.js';
+import { collectionPageSchema, faqSchema, itemListSchema } from '../../utils/schema.js';
+
+const path = '/vs/';
+const allPairs = getAllPairs(brokers);
+const sortedPairs = sortPairsForHub(allPairs);
+const listed = alphabetical(brokers);
+
+const listItems = sortedPairs.map((p) => ({
+  slug: p.slug,
+  name: `${p.a.name} vs ${p.b.name}`,
+}));
+
+const faqs = [
+  {
+    q: 'Which Indian brokers do you compare head-to-head?',
+    a: `We publish pairwise comparisons for all ${brokers.length} brokers we track — ${allPairs.length} unique pairs covering Zerodha, Upstox, Groww, Angel One, Dhan, Fyers and others. Each page uses only published official pricing and features.`,
+  },
+  {
+    q: 'How do you decide which broker is better?',
+    a: 'We do not declare an overall winner. Each comparison table shows published delivery, intraday and F&O brokerage, AMC, API availability and reported execution speed. Where data is missing, we show Not Disclosed rather than estimate.',
+  },
+  {
+    q: 'Is this comparison independent?',
+    a: 'Yes. Indian Broker Test has no broker affiliation, sponsorship or referral fees. See our methodology page for how data is compiled.',
+  },
+];
+
+const schemas = [
+  collectionPageSchema({
+    title: 'Indian Broker Comparisons — Head-to-Head',
+    description:
+      'Every major Indian stock broker compared head-to-head: brokerage, AMC, API and reported execution speed from official published data.',
+    path,
+  }),
+  itemListSchema({
+    name: 'Indian broker head-to-head comparisons',
+    path,
+    items: listItems,
+    itemPath: (it) => `/vs/${it.slug}/`,
+  }),
+  faqSchema(faqs),
+];
+---
+
+<ArticleLayout
+  title="Indian Broker Comparisons (2026): Upstox vs Zerodha vs Groww vs Dhan & More"
+  metaTitle="Broker Comparisons India (2026) — Head-to-Head"
+  description="Every major Indian stock broker compared head-to-head. Brokerage, AMC, trading APIs and reported execution speed from official published data — independent, no affiliation."
+  path={path}
+  eyebrow="Comparisons"
+  standfirst="Every tracked broker, compared pairwise on published pricing and features — delivery, intraday, F&O, AMC, APIs and reported execution speed. Independent; gaps shown as Not Disclosed."
+  crumbs={[{ name: 'Broker comparisons', path }]}
+  schemas={schemas}
+>
+  <p>
+    Pick a head-to-head comparison below, or browse our{' '}
+    <a href="/best-stock-brokers-in-india/">full broker comparison</a>,{' '}
+    <a href="/brokerage-calculators/">brokerage calculators</a> and{' '}
+    <a href="/brokers/">broker profiles</a>.
+  </p>
+
+  <h2>Head-to-head comparisons</h2>
+  <ul class="card-grid">
+    {sortedPairs.map((p) => (
+      <li class="card">
+        <a href={pairPath(p.a, p.b)}>{p.a.name} vs {p.b.name}</a>
+        <p>{pairBlurb(p.a, p.b)}</p>
+      </li>
+    ))}
+  </ul>
+
+  <h2>All brokers at a glance</h2>
+  <div class="table-wrap">
+    <table>
+      <caption>Published headline pricing — alphabetical (official sources at last review)</caption>
+      <thead>
+        <tr>
+          <th scope="col">Broker</th>
+          <th scope="col">Delivery</th>
+          <th scope="col">Intraday</th>
+          <th scope="col">F&amp;O</th>
+          <th scope="col">AMC</th>
+        </tr>
+      </thead>
+      <tbody>
+        {listed.map((b) => (
+          <tr>
+            <td><a href={`/brokers/${b.slug}/`}>{b.name}</a></td>
+            <td>{b.brokerage?.delivery ?? <span class="nd">Not Disclosed</span>}</td>
+            <td>{b.brokerage?.intraday ?? <span class="nd">Not Disclosed</span>}</td>
+            <td>{b.brokerage?.fno ?? <span class="nd">Not Disclosed</span>}</td>
+            <td>{b.amc ?? <span class="nd">Not Disclosed</span>}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+
+  <Faq faqs={faqs} />
+
+  <p class="disclaimer">
+    Comparisons reflect published rate-card text at our last data review. Plan-based brokers may
+    require reading the official pricing page. See <a href="/methodology/">methodology</a>.
+  </p>
+</ArticleLayout>
