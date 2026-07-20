@@ -17,6 +17,26 @@ Key facts about this site:
 - [Best brokers for algo trading](https://www.indianbrokertest.com/best-brokers-for-algo-trading/): APIs, algo-platform support and execution data for systematic traders.
 - [Best brokers for active traders](https://www.indianbrokertest.com/best-brokers-for-active-traders/): Costs and tooling for high-frequency discretionary trading.
 
+## Brokerage calculators
+
+- [All brokerage calculators](https://www.indianbrokertest.com/brokerage-calculators/): One calculator per tracked broker — estimate delivery, intraday and F&O brokerage per order from published official pricing (statutory charges excluded).
+- [Zerodha brokerage calculator](https://www.indianbrokertest.com/zerodha-brokerage-calculator/)
+- [Upstox brokerage calculator](https://www.indianbrokertest.com/upstox-brokerage-calculator/)
+- [Groww brokerage calculator](https://www.indianbrokertest.com/groww-brokerage-calculator/)
+- [Angel One brokerage calculator](https://www.indianbrokertest.com/angel-one-brokerage-calculator/)
+- [Dhan brokerage calculator](https://www.indianbrokertest.com/dhan-brokerage-calculator/)
+- [Fyers brokerage calculator](https://www.indianbrokertest.com/fyers-brokerage-calculator/)
+- [ICICI Direct brokerage calculator](https://www.indianbrokertest.com/icici-direct-brokerage-calculator/)
+- [Kotak Neo brokerage calculator](https://www.indianbrokertest.com/kotak-neo-brokerage-calculator/)
+- [5paisa brokerage calculator](https://www.indianbrokertest.com/5paisa-brokerage-calculator/)
+- [Alice Blue brokerage calculator](https://www.indianbrokertest.com/alice-blue-brokerage-calculator/)
+- [Paytm Money brokerage calculator](https://www.indianbrokertest.com/paytm-money-brokerage-calculator/)
+- [Pocketful brokerage calculator](https://www.indianbrokertest.com/pocketful-brokerage-calculator/)
+- [Arrow brokerage calculator](https://www.indianbrokertest.com/arrow-brokerage-calculator/)
+- [Sahi brokerage calculator](https://www.indianbrokertest.com/sahi-brokerage-calculator/)
+- [Shoonya brokerage calculator](https://www.indianbrokertest.com/shoonya-brokerage-calculator/)
+- [IIFL brokerage calculator](https://www.indianbrokertest.com/iifl-brokerage-calculator/)
+
 ## Broker profiles
 
 - [All broker profiles](https://www.indianbrokertest.com/brokers/): Independent profiles of every tracked broker (alphabetical).

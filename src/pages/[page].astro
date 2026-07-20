@@ -1,0 +1,105 @@
+---
+import ArticleLayout from '../layouts/ArticleLayout.astro';
+import BrokerageCalculator from '../components/BrokerageCalculator.astro';
+import Faq from '../components/Faq.astro';
+import SourceList from '../components/SourceList.astro';
+import { brokers } from '../data/brokers.js';
+import { brokerageRules, calculatorPath } from '../data/brokerage-rules.js';
+import { faqSchema, webApplicationSchema } from '../utils/schema.js';
+
+export function getStaticPaths() {
+  return brokers.map((broker) => ({
+    params: { page: `${broker.slug}-brokerage-calculator` },
+    props: { broker },
+  }));
+}
+
+const { broker } = Astro.props;
+const path = calculatorPath(broker.slug);
+const rules = brokerageRules[broker.slug];
+const b = broker;
+
+const pageTitle = `${b.name} Brokerage Calculator (2026): Estimate Delivery, Intraday & F&O Charges`;
+const metaTitle = `${b.name} Brokerage Calculator India (2026)`;
+const metaDescription = `Free ${b.name} brokerage calculator for India: estimate delivery, intraday and F&O charges per order from published official pricing. Statutory charges excluded.`;
+
+const faqs = [
+  {
+    q: `How is ${b.name} brokerage calculated?`,
+    a: rules?.calculable
+      ? `This calculator uses published ${b.name} pricing from its official rate card: delivery ${b.brokerage.delivery ?? 'Not Disclosed'}; intraday ${b.brokerage.intraday ?? 'Not Disclosed'}; F&O ${b.brokerage.fno ?? 'Not Disclosed'}. Statutory charges are not included.`
+      : `${b.name} pricing could not be modelled from verified published data at review time. See the official pricing page for current rates.`,
+  },
+  {
+    q: `How much brokerage does ${b.name} charge on delivery?`,
+    a: b.brokerage.delivery
+      ? `Per its official pricing at our last review: ${b.brokerage.delivery}. Enter your quantity and price in the calculator above to estimate the per-order charge.`
+      : `${b.name} does not publish a verifiable delivery brokerage figure we could cite.`,
+  },
+  {
+    q: `How much brokerage does ${b.name} charge on intraday trades?`,
+    a: b.brokerage.intraday
+      ? `Per its official pricing at our last review: ${b.brokerage.intraday}. Use the intraday tab in the calculator with your quantity and price.`
+      : `${b.name} does not publish a verifiable intraday brokerage figure we could cite.`,
+  },
+  {
+    q: 'Are taxes and exchange charges included?',
+    a: 'No. This tool estimates broker brokerage per order only. STT, exchange transaction charges, GST, stamp duty, SEBI fees and DP charges are additional and vary by segment and exchange.',
+  },
+  {
+    q: `Where can I verify ${b.name} charges?`,
+    a: `Always confirm on ${b.name}'s official pricing page before opening or placing trades. Rates and plans change without notice.`,
+  },
+];
+
+const sources = [
+  { label: `${b.name} - official website`, url: b.website },
+  ...(b.pricingUrl && b.pricingUrl !== b.website
+    ? [{ label: `${b.name} - official pricing page`, url: b.pricingUrl }]
+    : []),
+];
+
+const schemas = [
+  faqSchema(faqs),
+  webApplicationSchema({
+    name: `${b.name} Brokerage Calculator`,
+    description: metaDescription,
+    path,
+  }),
+];
+---
+
+<ArticleLayout
+  title={pageTitle}
+  metaTitle={metaTitle}
+  description={metaDescription}
+  path={path}
+  eyebrow="Brokerage calculator"
+  standfirst={`Estimate ${b.name} brokerage for a single order from published pricing — delivery, intraday and F&O. Statutory charges are not included; verify on the official rate card.`}
+  crumbs={[
+    { name: 'Brokerage calculators', path: '/brokerage-calculators/' },
+    { name: `${b.name} calculator`, path },
+  ]}
+  schemas={schemas}
+>
+  <h2>Published fee schedule</h2>
+  <dl class="dl-grid">
+    <dt>Delivery</dt><dd>{b.brokerage.delivery ?? <span class="nd">Not Disclosed</span>}</dd>
+    <dt>Intraday</dt><dd>{b.brokerage.intraday ?? <span class="nd">Not Disclosed</span>}</dd>
+    <dt>F&amp;O</dt><dd>{b.brokerage.fno ?? <span class="nd">Not Disclosed</span>}</dd>
+  </dl>
+
+  <h2>Calculate {b.name} brokerage</h2>
+  <BrokerageCalculator broker={b} rules={rules} />
+
+  <h2>Related pages</h2>
+  <ul>
+    <li><a href={`/brokers/${b.slug}/`}>{b.name} review</a> — platforms, API, execution speed</li>
+    <li><a href="/lowest-brokerage-brokers-in-india/">Lowest brokerage brokers in India</a></li>
+    <li><a href="/brokerage-calculators/">All brokerage calculators</a></li>
+    <li><a href="/best-stock-brokers-in-india/">Best stock brokers in India</a></li>
+  </ul>
+
+  <Faq faqs={faqs} />
+  <SourceList sources={sources} />
+</ArticleLayout>

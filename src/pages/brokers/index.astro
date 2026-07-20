@@ -1,6 +1,7 @@
 ---
 import ArticleLayout from '../../layouts/ArticleLayout.astro';
 import { brokers } from '../../data/brokers.js';
+import { calculatorPath } from '../../data/brokerage-rules.js';
 import { alphabetical } from '../../utils/ranking.js';
 import { itemListSchema, collectionPageSchema } from '../../utils/schema.js';
 
@@ -30,7 +31,9 @@ const schemas = [
     {sorted.map((b) => (
       <li class="card">
         <a href={`/brokers/${b.slug}/`}>{b.name}</a>
-        <p>{b.type}</p>
+        <p>
+          {b.type} · <a href={calculatorPath(b.slug)}>Brokerage calculator</a>
+        </p>
       </li>
     ))}
   </ul>

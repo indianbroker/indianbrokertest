@@ -1,9 +1,10 @@
 import rss from '@astrojs/rss';
-import { DATA_COMPILED } from '../data/brokers.js';
+import { brokers, DATA_COMPILED } from '../data/brokers.js';
+import { calculatorPath } from '../data/brokerage-rules.js';
 
 const pubDate = new Date(DATA_COMPILED + 'T00:00:00+05:30');
 
-const items = [
+const guides = [
   {
     title: 'Best Stock Brokers in India (2026): Full Comparison',
     link: '/best-stock-brokers-in-india/',
@@ -34,7 +35,22 @@ const items = [
     link: '/best-brokers-for-active-traders/',
     description: 'Per-order costs, reported speed and tooling for high-frequency discretionary trading.',
   },
+  {
+    title: 'Brokerage Calculators for Indian Stock Brokers',
+    link: '/brokerage-calculators/',
+    description: 'Per-broker calculators to estimate delivery, intraday and F&O brokerage from published pricing.',
+  },
 ];
+
+const calculatorItems = [...brokers]
+  .sort((a, b) => a.name.localeCompare(b.name))
+  .map((b) => ({
+    title: `${b.name} Brokerage Calculator (2026)`,
+    link: calculatorPath(b.slug),
+    description: `Estimate ${b.name} delivery, intraday and F&O brokerage per order from published official pricing. Statutory charges excluded.`,
+  }));
+
+const items = [...guides, ...calculatorItems];
 
 export function GET(context) {
   return rss({

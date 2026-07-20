@@ -68,7 +68,8 @@ export function faqSchema(faqs) {
   };
 }
 
-export function itemListSchema({ name, path, items }) {
+export function itemListSchema({ name, path, items, itemPath }) {
+  const urlFor = itemPath ?? ((it) => '/brokers/' + it.slug + '/');
   return {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
@@ -79,7 +80,7 @@ export function itemListSchema({ name, path, items }) {
       '@type': 'ListItem',
       position: i + 1,
       name: it.name,
-      url: SITE + '/brokers/' + it.slug + '/',
+      url: SITE + urlFor(it),
     })),
   };
 }
@@ -91,5 +92,22 @@ export function collectionPageSchema({ title, description, path }) {
     name: title,
     description,
     url: SITE + path,
+  };
+}
+
+export function webApplicationSchema({ name, description, path }) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'WebApplication',
+    name,
+    description,
+    url: SITE + path,
+    inLanguage: 'en-IN',
+    isPartOf: { '@type': 'WebSite', name: SITE_NAME, url: SITE + '/' },
+    applicationCategory: 'FinanceApplication',
+    operatingSystem: 'Any',
+    browserRequirements: 'Requires JavaScript',
+    offers: { '@type': 'Offer', price: '0', priceCurrency: 'INR' },
+    author: { '@type': 'Organization', name: SITE_NAME, url: SITE + '/about/' },
   };
 }

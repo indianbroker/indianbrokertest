@@ -7,6 +7,7 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
+    "test": "node --test src/utils/brokerageCalc.test.js",
     "indexnow": "node scripts/indexnow.mjs"
   },
   "dependencies": {

@@ -1,0 +1,184 @@
+---
+import { brokerageRules } from '../data/brokerage-rules.js';
+
+const { broker, rules = brokerageRules[broker.slug] } = Astro.props;
+
+const hasPlans = Boolean(rules?.plans);
+const planEntries = hasPlans ? Object.entries(rules.plans) : [];
+const hasFnoSplit = Boolean(rules?.fno);
+const defaultPlan = rules?.defaultPlan ?? (planEntries[0]?.[0] ?? '');
+---
+
+<div
+  id={`calc-${broker.slug}`}
+  class="brokerage-calc"
+  data-calculable={rules?.calculable ? '1' : '0'}
+  data-rules={JSON.stringify(rules ?? null)}
+  data-default-plan={defaultPlan}
+>
+  {!rules?.calculable ? (
+    <p class="calc-unavailable">
+      <span class="nd">Not calculable</span> — published pricing for {broker.name} could not be
+      modelled from verified data. See the{' '}
+      <a href={broker.pricingUrl ?? broker.website} rel="nofollow noopener">official pricing page</a>.
+    </p>
+  ) : (
+    <>
+      <form class="calc-form" aria-label={`${broker.name} brokerage calculator`}>
+        {hasPlans && (
+          <div class="calc-field">
+            <label for={`calc-plan-${broker.slug}`}>Pricing plan</label>
+            <select id={`calc-plan-${broker.slug}`} name="plan">
+              {planEntries.map(([id, plan]) => (
+                <option value={id} selected={id === defaultPlan}>
+                  {plan.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        <fieldset class="calc-segments">
+          <legend>Trade type</legend>
+          <label class="calc-radio">
+            <input type="radio" name="segment" value="delivery" checked /> Delivery
+          </label>
+          <label class="calc-radio">
+            <input type="radio" name="segment" value="intraday" /> Intraday
+          </label>
+          <label class="calc-radio">
+            <input type="radio" name="segment" value="fno" /> F&amp;O
+          </label>
+        </fieldset>
+
+        {hasFnoSplit && (
+          <fieldset class="calc-fno-type" hidden>
+            <legend>F&amp;O segment</legend>
+            <label class="calc-radio">
+              <input type="radio" name="fnoType" value="options" checked /> Options
+            </label>
+            <label class="calc-radio">
+              <input type="radio" name="fnoType" value="futures" /> Futures
+            </label>
+          </fieldset>
+        )}
+
+        <div class="calc-row">
+          <div class="calc-field">
+            <label for={`calc-qty-${broker.slug}`}>Quantity (shares / lots × lot size)</label>
+            <input
+              id={`calc-qty-${broker.slug}`}
+              class="calc-qty"
+              name="qty"
+              type="number"
+              min="1"
+              step="1"
+              value="100"
+              required
+            />
+          </div>
+          <div class="calc-field">
+            <label for={`calc-price-${broker.slug}`}>Price per unit (₹)</label>
+            <input
+              id={`calc-price-${broker.slug}`}
+              class="calc-price"
+              name="price"
+              type="number"
+              min="0.01"
+              step="0.01"
+              value="500"
+              required
+            />
+          </div>
+        </div>
+      </form>
+
+      <div class="calc-result" aria-live="polite" aria-atomic="true">
+        <p class="calc-result-label">Estimated brokerage per order</p>
+        <p class="calc-result-amount">—</p>
+        <p class="calc-result-detail"></p>
+        <p class="calc-result-note"></p>
+      </div>
+
+      <p class="calc-disclaimer">
+        Brokerage only. Statutory and regulatory charges (STT, exchange transaction charges, GST,
+        stamp duty, etc.) are extra. Verify current rates on{' '}
+        <a href={broker.pricingUrl ?? broker.website} rel="nofollow noopener">
+          {broker.name}&rsquo;s official pricing page
+        </a>{' '}
+        before trading. Independent tool — not affiliated with {broker.name}.
+      </p>
+    </>
+  )}
+</div>
+
+<script>
+  import { computeBrokerage, formatInr } from '../utils/brokerageCalc.js';
+
+  function initCalculator(root) {
+    const rules = JSON.parse(root.dataset.rules || 'null');
+    const form = root.querySelector('.calc-form');
+    const amountEl = root.querySelector('.calc-result-amount');
+    const detailEl = root.querySelector('.calc-result-detail');
+    const noteEl = root.querySelector('.calc-result-note');
+    const fnoFieldset = root.querySelector('.calc-fno-type');
+
+    function readSegment() {
+      return form.querySelector('input[name="segment"]:checked')?.value ?? 'delivery';
+    }
+
+    function readFnoType() {
+      return form.querySelector('input[name="fnoType"]:checked')?.value ?? 'options';
+    }
+
+    function readPlan() {
+      const sel = form.querySelector('select[name="plan"]');
+      return sel ? sel.value : undefined;
+    }
+
+    function update() {
+      const segment = readSegment();
+      if (fnoFieldset) {
+        fnoFieldset.hidden = segment !== 'fno';
+      }
+
+      const qty = Number(form.querySelector('.calc-qty').value);
+      const price = Number(form.querySelector('.calc-price').value);
+
+      const result = computeBrokerage({
+        rules,
+        segment,
+        qty,
+        price,
+        planId: readPlan(),
+        fnoType: readFnoType(),
+      });
+
+      if (!result.calculable) {
+        amountEl.textContent = 'Not calculable';
+        amountEl.classList.add('nd');
+        detailEl.textContent = result.note ?? '';
+        noteEl.textContent = result.turnover
+          ? `Turnover: ${formatInr(result.turnover)} (qty × price)`
+          : '';
+        return;
+      }
+
+      amountEl.classList.remove('nd');
+      amountEl.textContent = formatInr(result.amount);
+      detailEl.textContent = result.formula ?? '';
+      noteEl.textContent = [
+        result.turnover ? `Turnover: ${formatInr(result.turnover)}` : '',
+        result.note ?? '',
+      ]
+        .filter(Boolean)
+        .join(' · ');
+    }
+
+    form.addEventListener('input', update);
+    form.addEventListener('change', update);
+    update();
+  }
+
+  document.querySelectorAll('.brokerage-calc[data-calculable="1"]').forEach(initCalculator);
+</script>

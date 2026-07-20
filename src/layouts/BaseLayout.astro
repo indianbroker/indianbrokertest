@@ -10,7 +10,7 @@ const {
   schemas = [],
   published,
   modified,
-  image = '/og-default.png',
+  image = '/og-default.svg',
   noindex = false,
 } = Astro.props;
 
@@ -20,6 +20,7 @@ const ogImage = SITE + image;
 
 const nav = [
   { href: '/best-stock-brokers-in-india/', label: 'Best Brokers' },
+  { href: '/brokerage-calculators/', label: 'Calculators' },
   { href: '/fastest-order-execution-brokers-in-india/', label: 'Fastest Execution' },
   { href: '/lowest-brokerage-brokers-in-india/', label: 'Lowest Brokerage' },
   { href: '/best-trading-apis-in-india/', label: 'Trading APIs' },
@@ -56,7 +57,7 @@ const currentPath = Astro.url.pathname;
     <meta property="og:image" content={ogImage} />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:type" content="image/svg+xml" />
     <meta property="og:image:alt" content="Indian Broker Test - independent Indian stock broker comparison" />
     <meta property="og:locale" content="en_IN" />
     {published && <meta property="article:published_time" content={published} />}
@@ -117,6 +118,7 @@ const currentPath = Astro.url.pathname;
             <li><a href="/best-trading-apis-in-india/">Best trading APIs</a></li>
             <li><a href="/best-brokers-for-algo-trading/">Best for algo trading</a></li>
             <li><a href="/best-brokers-for-active-traders/">Best for active traders</a></li>
+            <li><a href="/brokerage-calculators/">Brokerage calculators</a></li>
           </ul>
         </div>
         <div>
