@@ -1,0 +1,484 @@
+---
+import { getCalculatorLayout, getInvestmentModeConfig } from '../data/calculator-modes.js';
+
+const { calc } = Astro.props;
+const layout = getCalculatorLayout(calc);
+const modeConfig = getInvestmentModeConfig(calc.slug);
+const isInvestment = layout === 'investment' && modeConfig;
+const activeMode = isInvestment
+  ? modeConfig.tabs.find((t) => t.id === modeConfig.defaultTab) ?? modeConfig.tabs[0]
+  : null;
+const outputs = isInvestment ? activeMode.outputs : calc.outputs;
+const inputs = isInvestment ? activeMode.inputs : calc.inputs;
+---
+
+<div
+  class={`calc-widget${isInvestment ? ' calc-widget--investment' : ' calc-widget--standard'}`}
+  data-layout={layout}
+  data-calc-id={isInvestment ? activeMode.calcId : calc.id}
+  data-default-tab={modeConfig?.defaultTab ?? ''}
+  data-mode-config={isInvestment ? JSON.stringify(modeConfig) : ''}
+  data-outputs={JSON.stringify(outputs)}
+>
+  {isInvestment ? (
+    <>
+      <div class="calc-widget-card">
+        {modeConfig && (
+          <div class="calc-widget-tabs" role="tablist" aria-label="Investment type">
+            {modeConfig.tabs.map((tab) => (
+              <button
+                type="button"
+                class="calc-widget-tab"
+                role="tab"
+                aria-selected={tab.id === modeConfig.defaultTab ? 'true' : 'false'}
+                data-mode={tab.id}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        )}
+
+        <div class="calc-widget-shell">
+          <div class="calc-widget-body">
+            <section class="calc-widget-inputs-col">
+              <form class="calc-widget-form" aria-label={`${calc.name} inputs`}>
+                <div class="calc-widget-fields">
+                  {inputs.map((input) => (
+                    <div class="calc-widget-field" data-field={input.id}>
+                      <div class="calc-widget-field-head">
+                        <label for={`calc-${calc.id}-${input.id}`}>{input.label}</label>
+                        <div class="calc-widget-inline-value">
+                          {input.type === 'currency' && <span>₹</span>}
+                          <input
+                            type="text"
+                            inputmode="decimal"
+                            class="calc-widget-inline-input"
+                            data-inline={input.id}
+                            aria-label={input.label}
+                          />
+                          {input.type === 'percent' && <span>%</span>}
+                          {input.type === 'years' && <span>Yr</span>}
+                        </div>
+                      </div>
+                      <input
+                        type="range"
+                        class="calc-widget-slider"
+                        data-input={input.id}
+                        data-type={input.type}
+                        value={input.default}
+                        min={input.min ?? 0}
+                        max={input.max ?? 100}
+                        step={input.step ?? (input.type === 'percent' ? 0.1 : 1)}
+                        aria-label={input.label}
+                      />
+                      <input
+                        id={`calc-${calc.id}-${input.id}`}
+                        type="number"
+                        class="calc-widget-input sr-only"
+                        data-input={input.id}
+                        value={input.default}
+                        min={input.min}
+                        max={input.max}
+                        step={input.step ?? (input.type === 'percent' ? 0.5 : 1)}
+                        tabindex="-1"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </form>
+            </section>
+
+            <section class="calc-widget-chart-col" aria-live="polite" aria-atomic="true">
+              <div class="calc-widget-chart-wrap">
+                <canvas class="calc-widget-chart" width="260" height="260" aria-hidden="true"></canvas>
+                <div class="calc-widget-chart-callout calc-widget-chart-callout--invested">
+                  <span class="calc-widget-chart-callout-label">Total Investment</span>
+                  <span class="calc-widget-chart-callout-value" data-output="invested" data-format="currency">—</span>
+                </div>
+                <div class="calc-widget-chart-callout calc-widget-chart-callout--returns">
+                  <span class="calc-widget-chart-callout-label">Wealth Gained</span>
+                  <span class="calc-widget-chart-callout-value" data-output="returns" data-format="currency">—</span>
+                </div>
+              </div>
+              <div class="calc-widget-total-box">
+                <span class="calc-widget-total-label">Total Wealth</span>
+                <span class="calc-widget-total-value" data-output="total" data-format="currency">—</span>
+              </div>
+            </section>
+          </div>
+
+          <div class="calc-widget-scenarios">
+            <h3 class="calc-widget-section-title">Maturity Amount Based on Growth Scenarios</h3>
+            <div class="calc-widget-scenario-row" role="radiogroup" aria-label="Growth scenarios"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="calc-widget-card calc-widget-card--table">
+        <h3 class="calc-widget-section-title">
+          Projected SIP returns for various time durations.
+          <span class="calc-widget-rate-tag"></span>
+        </h3>
+        <div class="calc-widget-table-scroll">
+          <table class="calc-widget-table">
+            <thead>
+              <tr>
+                <th scope="col">Year</th>
+                <th scope="col">Total Investment (₹)</th>
+                <th scope="col">Expected Returns (₹)</th>
+                <th scope="col">Total Value (₹)</th>
+              </tr>
+            </thead>
+            <tbody class="calc-widget-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </>
+  ) : (
+    <div class="calc-widget-card">
+      <div class="calc-widget-shell">
+        <div class="calc-widget-body">
+          <section class="calc-widget-inputs-col">
+            <form class="calc-widget-form" aria-label={`${calc.name} inputs`}>
+              <div class="calc-widget-fields">
+                {inputs.map((input) => (
+                  <div class="calc-widget-field">
+                    <label for={`calc-${calc.id}-${input.id}`}>{input.label}</label>
+                    {input.type === 'select' ? (
+                      <select id={`calc-${calc.id}-${input.id}`} data-input={input.id}>
+                        {input.options?.map((opt) => (
+                          <option value={opt.value} selected={opt.value === input.default}>
+                            {opt.label}
+                          </option>
+                        ))}
+                      </select>
+                    ) : (
+                      <div class="calc-widget-input-box">
+                        {input.type === 'currency' && <span class="calc-widget-affix">₹</span>}
+                        <input
+                          id={`calc-${calc.id}-${input.id}`}
+                          type="number"
+                          class="calc-widget-input"
+                          data-input={input.id}
+                          value={input.default}
+                          min={input.min}
+                          max={input.max}
+                          step={input.step ?? (input.type === 'percent' ? 0.5 : 1)}
+                        />
+                        {input.type === 'percent' && <span class="calc-widget-affix calc-widget-affix--suffix">%</span>}
+                        {input.type === 'years' && <span class="calc-widget-affix calc-widget-affix--suffix">Yr</span>}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </form>
+          </section>
+
+          <section class="calc-widget-results-col" aria-live="polite" aria-atomic="true">
+            <div class="calc-widget-summary">
+              {outputs.map((out) => (
+                <div class={`calc-widget-stat${out.highlight ? ' calc-widget-stat--primary' : ''}`}>
+                  <span class="calc-widget-stat-label">{out.label}</span>
+                  <span
+                    class="calc-widget-stat-value"
+                    data-output={out.id}
+                    data-format={out.format ?? 'currency'}
+                  >—</span>
+                </div>
+              ))}
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+  )}
+</div>
+
+<script>
+  import {
+    computeCalculator,
+    computeGrowthScenarios,
+    computeYearlyProjection,
+    formatInr,
+    formatInrCompact,
+  } from '../utils/financeCalc.js';
+
+  /** @param {string} format @param {number} value @param {boolean} [compact] */
+  function formatVal(format, value, compact = false) {
+    if (!Number.isFinite(value)) return '—';
+    if (format === 'percent') return `${value.toLocaleString('en-IN', { maximumFractionDigits: 2 })}%`;
+    if (format === 'number') return value.toLocaleString('en-IN', { maximumFractionDigits: 2 });
+    return compact ? formatInrCompact(value) : formatInr(value);
+  }
+
+  /** @param {number} n */
+  function formatInlineNumber(n) {
+    if (!Number.isFinite(n)) return '';
+    return n.toLocaleString('en-IN', { maximumFractionDigits: 2 });
+  }
+
+  /** @param {HTMLElement} root @param {Record<string, number>} result @param {boolean} compact */
+  function renderStats(root, result, compact) {
+    root.querySelectorAll('[data-output]').forEach((el) => {
+      const key = el.dataset.output;
+      const format = el.dataset.format ?? 'currency';
+      el.textContent = formatVal(format, result[key], compact);
+    });
+  }
+
+  /** @param {HTMLCanvasElement} canvas @param {number} invested @param {number} returns */
+  function drawDonut(canvas, invested, returns) {
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    const size = canvas.width;
+    const cx = size / 2;
+    const cy = size / 2;
+    const outer = size * 0.42;
+    const inner = size * 0.28;
+    const total = Math.max(invested + returns, 0);
+
+    ctx.clearRect(0, 0, size, size);
+
+    if (total <= 0) {
+      ctx.beginPath();
+      ctx.arc(cx, cy, outer, 0, Math.PI * 2);
+      ctx.arc(cx, cy, inner, 0, Math.PI * 2, true);
+      ctx.fillStyle = '#f1f1f1';
+      ctx.fill('evenodd');
+      return;
+    }
+
+    const slices = [
+      { value: invested, color: '#e6f1ec' },
+      { value: returns, color: '#0c6b4d' },
+    ];
+    let start = -Math.PI / 2;
+
+    for (const slice of slices) {
+      const angle = (slice.value / total) * Math.PI * 2;
+      ctx.beginPath();
+      ctx.arc(cx, cy, outer, start, start + angle);
+      ctx.arc(cx, cy, inner, start + angle, start, true);
+      ctx.closePath();
+      ctx.fillStyle = slice.color;
+      ctx.fill();
+      start += angle;
+    }
+  }
+
+  /** @param {HTMLElement} container @param {{ label: string, rate: number, total: number, active?: boolean }[]} scenarios */
+  function renderScenarios(container, scenarios) {
+    container.innerHTML = scenarios
+      .map(
+        (s, i) =>
+          `<label class="calc-widget-scenario${s.active ? ' is-active' : ''}">
+            <input type="radio" name="growth-scenario" value="${i}"${s.active ? ' checked' : ''} />
+            <span class="calc-widget-scenario-body">
+              <span class="calc-widget-scenario-amt">${formatInr(s.total)}</span>
+              <span class="calc-widget-scenario-meta">${s.label} (${s.rate.toFixed(1)}%)</span>
+            </span>
+          </label>`
+      )
+      .join('');
+  }
+
+  /** @param {HTMLElement} tbody @param {{ year: number, invested: number, returns: number, total: number }[]} rows */
+  function renderTable(tbody, rows) {
+    tbody.innerHTML = rows
+      .map(
+        (row, i) =>
+          `<tr class="${i % 2 === 1 ? 'is-alt' : ''}">
+            <td>${row.year}</td>
+            <td>${formatInrCompact(row.invested)}</td>
+            <td>${formatInrCompact(row.returns)}</td>
+            <td>${formatInrCompact(row.total)}</td>
+          </tr>`
+      )
+      .join('');
+  }
+
+  /** @param {HTMLElement} container @param {import('../data/calculator-modes.js').mutualFundModes['tabs'][0]['inputs']} fieldInputs @param {string} prefix */
+  function renderFields(container, fieldInputs, prefix) {
+    container.innerHTML = fieldInputs
+      .map((input) => {
+        const id = `${prefix}-${input.id}`;
+        const min = input.min ?? 0;
+        const max = input.max ?? 100;
+        const step = input.step ?? (input.type === 'percent' ? 0.1 : 1);
+        const suffix =
+          input.type === 'percent' ? '<span>%</span>' :
+          input.type === 'years' ? '<span>Yr</span>' : '';
+        const prefixHtml = input.type === 'currency' ? '<span>₹</span>' : '';
+        return `<div class="calc-widget-field" data-field="${input.id}">
+          <div class="calc-widget-field-head">
+            <label for="${id}">${input.label}</label>
+            <div class="calc-widget-inline-value">
+              ${prefixHtml}
+              <input type="text" inputmode="decimal" class="calc-widget-inline-input" data-inline="${input.id}" aria-label="${input.label}" />
+              ${suffix}
+            </div>
+          </div>
+          <input type="range" class="calc-widget-slider" data-input="${input.id}" data-type="${input.type}"
+            value="${input.default}" min="${min}" max="${max}" step="${step}" aria-label="${input.label}" />
+          <input id="${id}" class="calc-widget-input sr-only" type="number" data-input="${input.id}"
+            value="${input.default}" min="${min}" max="${max}" step="${step}" tabindex="-1" />
+        </div>`;
+      })
+      .join('');
+    bindInvestmentFields(container.closest('.calc-widget'));
+  }
+
+  /** @param {HTMLElement|null} root */
+  function bindInvestmentFields(root) {
+    if (!root) return;
+    const form = root.querySelector('.calc-widget-form');
+    if (!form) return;
+
+    form.querySelectorAll('.calc-widget-field').forEach((field) => {
+      const inputId = field.querySelector('[data-input]')?.dataset.input;
+      if (!inputId) return;
+      const slider = field.querySelector('.calc-widget-slider');
+      const hidden = field.querySelector('input.calc-widget-input[type="number"]');
+      const inline = field.querySelector('.calc-widget-inline-input');
+      if (!(slider instanceof HTMLInputElement) || !(hidden instanceof HTMLInputElement) || !(inline instanceof HTMLInputElement)) return;
+
+      const syncFrom = (value) => {
+        const num = Number(value);
+        if (!Number.isFinite(num)) return;
+        hidden.value = String(num);
+        slider.value = String(num);
+        inline.value = formatInlineNumber(num);
+        updateSliderFill(slider);
+      };
+
+      inline.value = formatInlineNumber(Number(hidden.value));
+
+      inline.addEventListener('change', () => {
+        const raw = inline.value.replace(/,/g, '');
+        syncFrom(raw);
+        hidden.dispatchEvent(new Event('input', { bubbles: true }));
+      });
+
+      slider.addEventListener('input', () => {
+        syncFrom(slider.value);
+        hidden.dispatchEvent(new Event('input', { bubbles: true }));
+      });
+    });
+  }
+
+  /** @param {HTMLInputElement} slider */
+  function updateSliderFill(slider) {
+    const min = Number(slider.min);
+    const max = Number(slider.max);
+    const val = Number(slider.value);
+    const pct = max > min ? ((val - min) / (max - min)) * 100 : 0;
+    slider.style.backgroundSize = `${pct}% 100%`;
+  }
+
+  document.querySelectorAll('.calc-widget').forEach((root) => {
+    const layout = root.dataset.layout;
+    const modeConfig = root.dataset.modeConfig ? JSON.parse(root.dataset.modeConfig) : null;
+    const form = root.querySelector('.calc-widget-form');
+    if (!form) return;
+
+    const fieldsEl = form.querySelector('.calc-widget-fields');
+    const resultsCol = root.querySelector('.calc-widget-results-col');
+    const chartCol = root.querySelector('.calc-widget-chart-col');
+    const canvas = root.querySelector('.calc-widget-chart');
+    let activeTab = root.dataset.defaultTab;
+    let calcId = root.dataset.calcId;
+
+    if (layout === 'investment') bindInvestmentFields(root);
+    root.querySelectorAll('.calc-widget-slider').forEach((s) => {
+      if (s instanceof HTMLInputElement) updateSliderFill(s);
+    });
+
+    function readInputs() {
+      /** @type {Record<string, number>} */
+      const inputs = {};
+      form.querySelectorAll('[data-input].calc-widget-input, [data-input].calc-widget-slider').forEach((el) => {
+        if (el.classList.contains('calc-widget-slider')) return;
+        inputs[el.dataset.input] = Number(el.value);
+      });
+      if (Object.keys(inputs).length === 0) {
+        form.querySelectorAll('[data-input]').forEach((el) => {
+          if (!el.classList.contains('calc-widget-inline-input')) {
+            inputs[el.dataset.input] = Number(el.value);
+          }
+        });
+      }
+      return inputs;
+    }
+
+    function getMode() {
+      if (!modeConfig) return null;
+      return modeConfig.tabs.find((t) => t.id === activeTab) ?? modeConfig.tabs[0];
+    }
+
+    function rebuildOutputs(mode) {
+      if (!resultsCol) return;
+      const summary = resultsCol.querySelector('.calc-widget-summary');
+      summary.innerHTML = mode.outputs
+        .map(
+          (out) =>
+            `<div class="calc-widget-stat${out.highlight ? ' calc-widget-stat--primary' : ''}">
+              <span class="calc-widget-stat-label">${out.label}</span>
+              <span class="calc-widget-stat-value" data-output="${out.id}" data-format="${out.format ?? 'currency'}">—</span>
+            </div>`
+        )
+        .join('');
+    }
+
+    function update() {
+      const inputs = readInputs();
+      const result = computeCalculator(calcId, inputs);
+      if (!result) return;
+
+      const compact = layout === 'investment';
+      const statsRoot = layout === 'investment' ? chartCol ?? root : resultsCol ?? root;
+      renderStats(statsRoot, result, compact);
+
+      if (layout === 'investment' && canvas instanceof HTMLCanvasElement) {
+        drawDonut(canvas, result.invested ?? 0, result.returns ?? 0);
+      }
+
+      if (layout === 'investment') {
+        const mode = getMode();
+        const scenarioRow = root.querySelector('.calc-widget-scenario-row');
+        if (scenarioRow && mode?.hasScenarios) {
+          renderScenarios(scenarioRow, computeGrowthScenarios(calcId, inputs));
+        }
+        const tbody = root.querySelector('.calc-widget-table-body');
+        const rateTag = root.querySelector('.calc-widget-rate-tag');
+        if (tbody && mode?.hasYearlyTable) {
+          if (rateTag) rateTag.textContent = `[ @${inputs.rate}% ]`;
+          renderTable(tbody, computeYearlyProjection(calcId, inputs));
+        }
+      }
+    }
+
+    if (layout === 'investment' && modeConfig) {
+      root.querySelectorAll('.calc-widget-tab').forEach((tab) => {
+        tab.addEventListener('click', () => {
+          activeTab = tab.dataset.mode ?? activeTab;
+          const mode = getMode();
+          if (!mode || !fieldsEl) return;
+          calcId = mode.calcId;
+          root.dataset.calcId = calcId;
+          root.querySelectorAll('.calc-widget-tab').forEach((t) => {
+            t.setAttribute('aria-selected', t === tab ? 'true' : 'false');
+          });
+          renderFields(fieldsEl, mode.inputs, `calc-${mode.calcId}`);
+          if (resultsCol) rebuildOutputs(mode);
+          update();
+        });
+      });
+    }
+
+    form.addEventListener('input', update);
+    form.addEventListener('change', update);
+    update();
+  });
+</script>

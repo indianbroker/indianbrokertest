@@ -1,0 +1,21 @@
+---
+import { getRelatedCalculators } from '../data/calculators.js';
+
+const { slug, title = 'Popular calculators' } = Astro.props;
+const related = getRelatedCalculators(slug, 15);
+---
+
+{related.length > 0 && (
+  <section class="calc-popular">
+    <h2>{title}</h2>
+    <ul class="calc-popular-list">
+      {related.map((calc) => (
+        <li>
+          <a href={calc.external ? calc.externalPath : `/calculators/${calc.slug}/`}>
+            {calc.name}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </section>
+)}

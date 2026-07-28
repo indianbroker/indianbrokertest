@@ -15,15 +15,15 @@ const listItems = sorted.map((b) => ({
 const faqs = [
   {
     q: 'Which Indian brokers have a brokerage calculator on this site?',
-    a: `We publish one calculator for each of the ${brokers.length} brokers we track — including Zerodha, Upstox, Groww, Angel One, Dhan, Fyers and others. Each tool uses published official pricing only; statutory charges are excluded.`,
+    a: `We publish one trade cost calculator for each of the ${brokers.length} brokers we track — including Zerodha, Upstox, Groww, Angel One, Dhan, Fyers and others. Each tool estimates brokerage plus statutory charges for delivery, intraday and F&O round trips.`,
   },
   {
     q: 'Are these brokerage calculators accurate?',
-    a: 'They model per-order brokerage from published rate-card text at our last data review. Plan-based brokers may require selecting a documented plan. Unmodelled segments show Not Disclosed rather than a guess. Always verify on the broker\'s official pricing page before trading.',
+    a: 'They model buy-then-sell round trips using published broker rate cards and current statutory rates. Plan-based brokers may require selecting a documented plan. Unmodelled segments show not calculable rather than a guess. Always verify on the broker\'s official pricing page before trading.',
   },
   {
     q: 'Do the calculators include STT, GST and exchange charges?',
-    a: 'No. Each calculator estimates broker brokerage per order only. STT/CTT, exchange transaction charges, GST, stamp duty, SEBI fees and DP charges are additional.',
+    a: 'Yes. Each calculator shows brokerage, STT, exchange transaction charges, GST, SEBI fees, stamp duty and approximate DP charges on delivery sells. Exchange txn rates can vary by stock category.',
   },
 ];
 
@@ -47,16 +47,17 @@ const schemas = [
 <ArticleLayout
   title="Brokerage Calculators for Indian Stock Brokers (2026)"
   metaTitle="Brokerage Calculators India (2026) — Every Broker"
-  description="Free brokerage calculators for every Indian broker we track. Estimate per-order delivery, intraday and F&O charges from published official pricing."
+  description="Free trade cost calculators for every Indian broker we track. Estimate delivery, intraday and F&O charges including brokerage, STT, GST and net P&L."
   path={path}
   eyebrow="Tools"
-  standfirst="One calculator per broker — built only from published official pricing. Statutory charges (STT, exchange fees, GST) are not included."
+  standfirst="One calculator per broker — full round-trip cost estimates with brokerage, statutory charges, breakeven points and net P&L."
   crumbs={[{ name: 'Brokerage calculators', path }]}
   schemas={schemas}
 >
   <p>
-    Use these tools to estimate <strong>brokerage per order</strong> for delivery, intraday and F&amp;O
-    trades. Compare headline costs on our{' '}
+    Use these tools to estimate <strong>full trade costs</strong> for delivery, intraday and F&amp;O
+    round trips — brokerage, STT, exchange fees, GST, stamp duty, breakeven and net P&amp;L. Browse
+    all financial tools on the <a href="/calculators/">calculators hub</a>. Compare headline costs on our{' '}
     <a href="/lowest-brokerage-brokers-in-india/">lowest brokerage comparison</a>, any two brokers on
     the <a href="/vs/">head-to-head comparison hub</a>, or read each{' '}
     <a href="/brokers/">broker profile</a> for platforms, APIs and execution data.
@@ -77,8 +78,9 @@ const schemas = [
   <Faq faqs={faqs} />
 
   <p class="disclaimer">
-    Each calculator models brokerage per order from published rate-card text. Plan-based brokers may
-    require selecting a documented plan. Unmodelled segments show &ldquo;Not calculable&rdquo; rather
-    than an estimate. See our <a href="/methodology/">methodology</a>.
+    Each calculator models a buy-then-sell round trip from published rate-card text and current
+    statutory rates. Plan-based brokers may require selecting a documented plan. Unmodelled segments
+    show &ldquo;Not calculable&rdquo; rather than an estimate. See our{' '}
+    <a href="/methodology/">methodology</a>.
   </p>
 </ArticleLayout>

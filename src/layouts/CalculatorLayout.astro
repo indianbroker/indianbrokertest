@@ -1,0 +1,67 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import CalculatorSidebar from '../components/CalculatorSidebar.astro';
+import { breadcrumbSchema, articleSchema } from '../utils/schema.js';
+import { DATA_COMPILED } from '../data/brokers.js';
+
+const {
+  title,
+  metaTitle,
+  description,
+  path,
+  standfirst,
+  crumbs = [],
+  schemas = [],
+  sidebarLinks = [],
+  published = '2026-07-09',
+  modified = DATA_COMPILED,
+} = Astro.props;
+
+const allCrumbs = [{ name: 'Home', path: '/' }, ...crumbs];
+const allSchemas = [
+  breadcrumbSchema(allCrumbs),
+  articleSchema({ title, description, path, datePublished: published, dateModified: modified }),
+  ...schemas,
+];
+
+const fmt = (d) =>
+  new Date(d + 'T00:00:00+05:30').toLocaleDateString('en-IN', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
+---
+
+<BaseLayout
+  title={metaTitle ?? title}
+  description={description}
+  path={path}
+  ogType="article"
+  schemas={allSchemas}
+  published={published}
+  modified={modified}
+>
+  <div class="calc-page">
+    <article class="calc-page-article">
+      <Breadcrumbs crumbs={allCrumbs} />
+      <p class="eyebrow">Financial calculator</p>
+      <h1>{title}</h1>
+      {standfirst && <p class="standfirst">{standfirst}</p>}
+      <p class="meta-line">
+        By the Indian Broker Test editorial desk · Published {fmt(published)} · Data last
+        reviewed {fmt(modified)} · Independent
+      </p>
+
+      <div class="calc-page-grid">
+        <div class="calc-page-main">
+          <slot name="calculator" />
+          <div class="calc-page-content">
+            <slot />
+          </div>
+        </div>
+        {sidebarLinks.length > 0 && <CalculatorSidebar links={sidebarLinks} />}
+      </div>
+    </article>
+  </div>
+</BaseLayout>

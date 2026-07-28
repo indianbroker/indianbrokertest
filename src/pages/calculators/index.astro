@@ -1,0 +1,80 @@
+---
+import ArticleLayout from '../../layouts/ArticleLayout.astro';
+import CalculatorHubCard from '../../components/CalculatorHubCard.astro';
+import { featuredCalculators } from '../../data/calculator-hub.js';
+import { calculators, calculatorPath } from '../../data/calculators.js';
+import { collectionPageSchema, faqSchema, itemListSchema } from '../../utils/schema.js';
+
+const path = '/calculators/';
+
+const moreCalcs = calculators.filter(
+  (c) =>
+    !c.external &&
+    !featuredCalculators.some((f) => f.href === calculatorPath(c.slug))
+);
+
+const calcItems = calculators.map((c) => ({
+  slug: c.slug,
+  name: c.name,
+  external: c.external,
+  externalPath: c.externalPath,
+}));
+
+const faqs = [
+  {
+    q: 'Which calculators are available?',
+    a: 'We offer SIP, lumpsum, step-up SIP, mutual fund, income tax, EMI, FD, PPF and many more — plus per-broker brokerage calculators for every broker we track.',
+  },
+  {
+    q: 'Are these calculators free?',
+    a: 'Yes. All calculators are free, require no signup, and run in your browser.',
+  },
+];
+
+const schemas = [
+  collectionPageSchema({
+    title: 'Calculators',
+    description: 'Free online financial calculators — SIP, lumpsum, brokerage, income tax and more.',
+    path,
+  }),
+  itemListSchema({
+    name: 'Financial calculators',
+    path,
+    items: calcItems,
+    itemPath: (it) => (it.external ? it.externalPath : calculatorPath(it.slug)),
+  }),
+  faqSchema(faqs),
+];
+---
+
+<ArticleLayout
+  title="Calculators"
+  metaTitle="Calculators — SIP, Lumpsum, Brokerage, Income Tax & More"
+  description="Free online calculators for SIP, lumpsum, step-up SIP, mutual fund returns, brokerage charges and income tax in India."
+  path={path}
+  eyebrow="Tools"
+  standfirst="Estimate investment returns, loan EMIs, tax liability and trading costs — free, instant, no signup."
+  crumbs={[{ name: 'Calculators', path }]}
+  schemas={schemas}
+>
+  <div class="calc-hub-grid">
+    {featuredCalculators.map((item) => (
+      <CalculatorHubCard title={item.title} description={item.description} href={item.href} />
+    ))}
+  </div>
+
+  {moreCalcs.length > 0 && (
+    <section class="calc-hub-more">
+      <h2>More calculators</h2>
+      <div class="calc-hub-grid">
+        {moreCalcs.map((c) => (
+          <CalculatorHubCard
+            title={c.name}
+            description={c.standfirst}
+            href={calculatorPath(c.slug)}
+          />
+        ))}
+      </div>
+    </section>
+  )}
+</ArticleLayout>

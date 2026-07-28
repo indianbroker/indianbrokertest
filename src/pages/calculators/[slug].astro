@@ -1,0 +1,119 @@
+---
+import CalculatorLayout from '../../layouts/CalculatorLayout.astro';
+import FinancialCalculator from '../../components/FinancialCalculator.astro';
+import Faq from '../../components/Faq.astro';
+import { getInvestmentModeConfig } from '../../data/calculator-modes.js';
+import { getCalculatorSidebarLinks } from '../../data/calculator-sidebar.js';
+import { calculators, calculatorPath } from '../../data/calculators.js';
+import { calculatorPath as brokerageHubPath } from '../../data/brokerage-rules.js';
+import { faqSchema, webApplicationSchema } from '../../utils/schema.js';
+
+export function getStaticPaths() {
+  return calculators
+    .filter((c) => !c.external)
+    .map((calc) => ({
+      params: { slug: calc.slug },
+      props: { calc },
+    }));
+}
+
+const { calc } = Astro.props;
+const path = calculatorPath(calc.slug);
+const isInvestmentGroup = Boolean(getInvestmentModeConfig(calc.slug));
+const sidebarLinks = getCalculatorSidebarLinks(calc.slug);
+
+const hubFaqs = [
+  ...(calc.faqs ?? []),
+  {
+    q: 'Are these calculators free to use?',
+    a: 'Yes. All calculators are free, require no signup, and run entirely in your browser.',
+  },
+];
+
+const schemas = [
+  faqSchema(hubFaqs),
+  webApplicationSchema({
+    name: calc.name,
+    description: calc.metaDescription,
+    path,
+  }),
+];
+---
+
+<CalculatorLayout
+  title={calc.h1}
+  metaTitle={calc.metaTitle}
+  description={calc.metaDescription}
+  path={path}
+  standfirst={calc.standfirst}
+  crumbs={[
+    { name: 'Calculators', path: '/calculators/' },
+    { name: calc.name, path },
+  ]}
+  sidebarLinks={sidebarLinks}
+  schemas={schemas}
+>
+  <FinancialCalculator slot="calculator" calc={calc} />
+
+  {isInvestmentGroup && (
+    <>
+      <h2>What is a Systematic Investment Plan (SIP)?</h2>
+      <p>{calc.intro}</p>
+      <ol>
+        <li><strong>Regular investments</strong> — invest a fixed amount at set intervals instead of one large lump sum.</li>
+        <li><strong>Rupee cost averaging</strong> — buy more units when prices are low and fewer when prices are high.</li>
+        <li><strong>Disciplined approach</strong> — automated contributions build a consistent saving habit.</li>
+        <li><strong>Compounding benefits</strong> — returns on returns accelerate long-term wealth creation.</li>
+      </ol>
+
+      <h2>What is a SIP Calculator?</h2>
+      <p>
+        A SIP calculator estimates the potential returns from your systematic investment plan. Enter monthly
+        investment, expected growth rate and duration to see total investment, wealth gained and maturity value.
+      </p>
+
+      <h2>Benefits of Using a SIP Return Calculator</h2>
+      <ul>
+        <li>Assists you to determine the amount you want to invest in.</li>
+        <li>Tells you the total amount you have invested.</li>
+        <li>Gives an estimated value of the returns.</li>
+      </ul>
+
+      <h2>How do SIP Calculators Work?</h2>
+      {calc.formula && <p class="calc-formula"><code>{calc.formula}</code></p>}
+      <p>{calc.howItWorks}</p>
+
+      <h2>How to Use This Calculator</h2>
+      <ol>
+        <li>Enter your monthly investment amount.</li>
+        <li>Specify the investment duration in years.</li>
+        <li>Input your expected annual rate of return.</li>
+        <li>Switch between SIP, Lumpsum and Step up tabs to compare strategies.</li>
+      </ol>
+    </>
+  )}
+
+  {!isInvestmentGroup && (
+    <>
+      <h2>About this calculator</h2>
+      <p>{calc.intro}</p>
+      {calc.formula && (
+        <>
+          <h2>Formula</h2>
+          <p class="calc-formula"><code>{calc.formula}</code></p>
+        </>
+      )}
+      <h2>How to use this calculator</h2>
+      <p>{calc.howItWorks}</p>
+    </>
+  )}
+
+  <Faq faqs={hubFaqs} />
+
+  <p class="disclaimer">
+    Results are estimates for planning purposes only — not investment, tax or legal advice. Verify rates on
+    official sources before acting. Compare brokers on our{' '}
+    <a href="/best-stock-brokers-in-india/">best stock brokers</a> guide or use the{' '}
+    <a href={brokerageHubPath}>brokerage calculator</a>.
+  </p>
+</CalculatorLayout>

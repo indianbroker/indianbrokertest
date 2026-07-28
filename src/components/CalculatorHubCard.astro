@@ -1,0 +1,15 @@
+---
+const { title, description, href } = Astro.props;
+---
+
+<article class="calc-hub-card">
+  <div class="calc-hub-card-icon" aria-hidden="true">
+    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="40" height="40" rx="4" fill="#e6f1ec"/>
+      <path d="M12 26V14h4v12h-4zm6 0V18h4v8h-4zm6 0V12h4v14h-4z" fill="#0c6b4d"/>
+    </svg>
+  </div>
+  <h2 class="calc-hub-card-title">{title}</h2>
+  <p class="calc-hub-card-desc">{description}</p>
+  <a class="calc-hub-card-cta" href={href}>Calculate Now</a>
+</article>

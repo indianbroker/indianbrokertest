@@ -1,7 +1,17 @@
 /**
- * Pure brokerage calculation from structured rules in brokerage-rules.js.
- * Brokerage only — statutory charges (STT, exchange, GST, stamp duty) excluded.
+ * Trade cost calculation from structured rules in brokerage-rules.js
+ * plus statutory levies in statutory-charges.js.
  */
+
+import {
+  DP_CHARGE_GST,
+  DP_CHARGE_SELL,
+  exchangeTxnRates,
+  GST_RATE,
+  SEBI_RATE,
+  stampDutyRates,
+  sttRates,
+} from '../data/statutory-charges.js';
 
 /** @param {number} n */
 export function formatInr(n) {
@@ -150,5 +160,160 @@ export function computeBrokerage({ rules, segment, qty, price, planId, fnoType =
     turnover,
     formula,
     note: segmentNote ?? null,
+  };
+}
+
+/** @param {number} n */
+function round2(n) {
+  return Math.round(n * 100) / 100;
+}
+
+/**
+ * Map UI segment to brokerage-rules segment + optional F&O type.
+ * @param {import('../data/statutory-charges.js').TradeSegment} tradeSegment
+ */
+function resolveBrokerageSegment(tradeSegment) {
+  switch (tradeSegment) {
+    case 'delivery':
+      return { segment: 'delivery', fnoType: 'options' };
+    case 'intraday':
+      return { segment: 'intraday', fnoType: 'options' };
+    case 'fno_futures':
+      return { segment: 'fno', fnoType: 'futures' };
+    case 'fno_options':
+      return { segment: 'fno', fnoType: 'options' };
+    default:
+      return { segment: 'delivery', fnoType: 'options' };
+  }
+}
+
+/**
+ * Full round-trip trade estimate: brokerage + statutory charges + P&L.
+ *
+ * @param {Object} opts
+ * @param {import('../data/brokerage-rules.js').BrokerageRules | null} opts.rules
+ * @param {import('../data/statutory-charges.js').TradeSegment} opts.tradeSegment
+ * @param {import('../data/statutory-charges.js').Exchange} opts.exchange
+ * @param {number} opts.buyPrice
+ * @param {number} opts.sellPrice
+ * @param {number} opts.qty
+ * @param {string} [opts.planId]
+ */
+export function computeTradeEstimate({
+  rules,
+  tradeSegment,
+  exchange,
+  buyPrice,
+  sellPrice,
+  qty,
+  planId,
+}) {
+  if (!Number.isFinite(qty) || qty <= 0) {
+    return { calculable: false, note: 'Enter a valid quantity.' };
+  }
+  if (!Number.isFinite(buyPrice) || buyPrice <= 0 || !Number.isFinite(sellPrice) || sellPrice <= 0) {
+    return { calculable: false, note: 'Enter valid buy and sell prices.' };
+  }
+
+  const { segment, fnoType } = resolveBrokerageSegment(tradeSegment);
+
+  const buyLeg = computeBrokerage({ rules, segment, qty, price: buyPrice, planId, fnoType });
+  const sellLeg = computeBrokerage({ rules, segment, qty, price: sellPrice, planId, fnoType });
+
+  if (!buyLeg.calculable || !sellLeg.calculable) {
+    return {
+      calculable: false,
+      note: buyLeg.note ?? sellLeg.note ?? 'Not calculable for this segment or plan.',
+      buyTurnover: qty * buyPrice,
+      sellTurnover: qty * sellPrice,
+    };
+  }
+
+  const buyTurnover = qty * buyPrice;
+  const sellTurnover = qty * sellPrice;
+  const totalTurnover = buyTurnover + sellTurnover;
+
+  const brokerageBuy = buyLeg.amount ?? 0;
+  const brokerageSell = sellLeg.amount ?? 0;
+  const brokerageTotal = round2(brokerageBuy + brokerageSell);
+
+  const sttCfg = sttRates[tradeSegment];
+  const sttBuy = round2(buyTurnover * sttCfg.buy);
+  const sttSell = round2(sellTurnover * sttCfg.sell);
+  const sttTotal = round2(sttBuy + sttSell);
+
+  const txnRate = exchangeTxnRates[exchange][tradeSegment];
+  const exchangeBuy = round2(buyTurnover * txnRate);
+  const exchangeSell = round2(sellTurnover * txnRate);
+  const exchangeTotal = round2(exchangeBuy + exchangeSell);
+
+  const sebiTotal = round2(totalTurnover * SEBI_RATE);
+
+  const stampRate = stampDutyRates[tradeSegment];
+  const stampDuty = round2(buyTurnover * stampRate);
+
+  const gstBase = brokerageTotal + exchangeTotal + sebiTotal;
+  const gst = round2(gstBase * GST_RATE);
+
+  const dpCharge =
+    tradeSegment === 'delivery' ? round2(DP_CHARGE_SELL + DP_CHARGE_GST) : 0;
+
+  const statutoryTotal = round2(sttTotal + exchangeTotal + sebiTotal + stampDuty + gst);
+  const totalCharges = round2(brokerageTotal + statutoryTotal + dpCharge);
+
+  const grossPnl = round2((sellPrice - buyPrice) * qty);
+  const netPnl = round2(grossPnl - totalCharges);
+  const breakevenPoints = round2(totalCharges / qty);
+
+  return {
+    calculable: true,
+    note: buyLeg.note ?? sellLeg.note ?? null,
+    exchange,
+    tradeSegment,
+    buyPrice,
+    sellPrice,
+    qty,
+    buyTurnover,
+    sellTurnover,
+    totalTurnover,
+    brokerage: {
+      buy: brokerageBuy,
+      sell: brokerageSell,
+      total: brokerageTotal,
+      buyFormula: buyLeg.formula,
+      sellFormula: sellLeg.formula,
+    },
+    stt: { buy: sttBuy, sell: sttSell, total: sttTotal },
+    exchangeTxn: { buy: exchangeBuy, sell: exchangeSell, total: exchangeTotal },
+    sebi: sebiTotal,
+    stampDuty,
+    gst,
+    dpCharge,
+    statutoryTotal,
+    totalCharges,
+    grossPnl,
+    netPnl,
+    breakevenPoints,
+    contractNote: {
+      legs: [
+        {
+          side: 'Buy',
+          price: buyPrice,
+          qty,
+          turnover: buyTurnover,
+          brokerage: brokerageBuy,
+        },
+        {
+          side: 'Sell',
+          price: sellPrice,
+          qty,
+          turnover: sellTurnover,
+          brokerage: brokerageSell,
+        },
+      ],
+      grossPnl,
+      totalCharges,
+      netPnl,
+    },
   };
 }

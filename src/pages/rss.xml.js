@@ -1,5 +1,6 @@
 import rss from '@astrojs/rss';
 import { brokers, DATA_COMPILED } from '../data/brokers.js';
+import { calculators, calculatorPath as finCalcPath } from '../data/calculators.js';
 import { calculatorPath } from '../data/brokerage-rules.js';
 import { getAllPairs, FEATURED_BROKER_SLUGS, pairPath } from '../utils/comparisons.js';
 
@@ -37,9 +38,14 @@ const guides = [
     description: 'Per-order costs, reported speed and tooling for high-frequency discretionary trading.',
   },
   {
+    title: 'Financial Calculators for India — SIP, EMI, Tax & More',
+    link: '/calculators/',
+    description: 'Free SIP, lumpsum, FD, RD, PPF, EMI, income tax, HRA, GST, margin and trading calculators for India.',
+  },
+  {
     title: 'Brokerage Calculators for Indian Stock Brokers',
     link: '/brokerage-calculators/',
-    description: 'Per-broker calculators to estimate delivery, intraday and F&O brokerage from published pricing.',
+    description: 'Per-broker calculators to estimate delivery, intraday and F&O trade costs from published pricing.',
   },
   {
     title: 'Indian Broker Comparisons — Head-to-Head (2026)',
@@ -53,7 +59,7 @@ const calculatorItems = [...brokers]
   .map((b) => ({
     title: `${b.name} Brokerage Calculator (2026)`,
     link: calculatorPath(b.slug),
-    description: `Estimate ${b.name} delivery, intraday and F&O brokerage per order from published official pricing. Statutory charges excluded.`,
+    description: `Estimate ${b.name} delivery, intraday and F&O trade costs — brokerage, STT, exchange charges, GST, stamp duty, breakeven and net P&L.`,
   }));
 
 const featuredSet = new Set(FEATURED_BROKER_SLUGS.slice(0, 6));
@@ -65,7 +71,16 @@ const comparisonItems = getAllPairs(brokers)
     description: `${p.a.name} vs ${p.b.name}: delivery, intraday and F&O brokerage, AMC, trading API and reported execution speed compared from official published data.`,
   }));
 
-const items = [...guides, ...comparisonItems, ...calculatorItems];
+const finCalculatorItems = calculators
+  .filter((c) => !c.external)
+  .slice(0, 12)
+  .map((c) => ({
+    title: c.metaTitle,
+    link: finCalcPath(c.slug),
+    description: c.metaDescription,
+  }));
+
+const items = [...guides, ...finCalculatorItems, ...comparisonItems, ...calculatorItems];
 
 export function GET(context) {
   return rss({

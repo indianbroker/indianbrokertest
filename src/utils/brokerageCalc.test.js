@@ -1,6 +1,6 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { computeBrokerage, formatInr } from './brokerageCalc.js';
+import { computeBrokerage, computeTradeEstimate, formatInr } from './brokerageCalc.js';
 import { brokerageRules } from '../data/brokerage-rules.js';
 
 describe('formatInr', () => {
@@ -114,5 +114,85 @@ describe('computeBrokerage', () => {
       price: 100,
     });
     assert.equal(r.calculable, false);
+  });
+});
+
+describe('computeTradeEstimate', () => {
+  it('Zerodha intraday round trip on NSE', () => {
+    const r = computeTradeEstimate({
+      rules: brokerageRules.zerodha,
+      tradeSegment: 'intraday',
+      exchange: 'nse',
+      buyPrice: 500,
+      sellPrice: 510,
+      qty: 100,
+    });
+    assert.equal(r.calculable, true);
+    assert.equal(r.brokerage.total, 30.3);
+    assert.equal(r.stt.total, 12.75);
+    assert.equal(r.grossPnl, 1000);
+    assert.ok(r.netPnl > 900);
+    assert.ok(r.breakevenPoints > 0);
+  });
+
+  it('Zerodha delivery includes DP charge', () => {
+    const r = computeTradeEstimate({
+      rules: brokerageRules.zerodha,
+      tradeSegment: 'delivery',
+      exchange: 'nse',
+      buyPrice: 500,
+      sellPrice: 520,
+      qty: 10,
+    });
+    assert.equal(r.calculable, true);
+    assert.equal(r.brokerage.total, 0);
+    assert.ok(r.dpCharge > 0);
+    assert.equal(r.stt.total, 10.2);
+  });
+
+  it('Shoonya has zero brokerage but statutory charges remain', () => {
+    const r = computeTradeEstimate({
+      rules: brokerageRules.shoonya,
+      tradeSegment: 'intraday',
+      exchange: 'nse',
+      buyPrice: 100,
+      sellPrice: 105,
+      qty: 50,
+    });
+    assert.equal(r.brokerage.total, 0);
+    assert.ok(r.totalCharges > 0);
+  });
+
+  it('Kotak Neo delivery unavailable on Trade Free plan', () => {
+    const r = computeTradeEstimate({
+      rules: brokerageRules['kotak-neo'],
+      tradeSegment: 'delivery',
+      exchange: 'nse',
+      buyPrice: 100,
+      sellPrice: 110,
+      qty: 10,
+      planId: 'trade-free',
+    });
+    assert.equal(r.calculable, false);
+  });
+
+  it('BSE exchange charges differ from NSE', () => {
+    const nse = computeTradeEstimate({
+      rules: brokerageRules.zerodha,
+      tradeSegment: 'intraday',
+      exchange: 'nse',
+      buyPrice: 500,
+      sellPrice: 510,
+      qty: 100,
+    });
+    const bse = computeTradeEstimate({
+      rules: brokerageRules.zerodha,
+      tradeSegment: 'intraday',
+      exchange: 'bse',
+      buyPrice: 500,
+      sellPrice: 510,
+      qty: 100,
+    });
+    assert.notEqual(nse.exchangeTxn.total, bse.exchangeTxn.total);
   });
 });

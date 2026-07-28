@@ -1,19 +1,27 @@
 ---
 import { brokerageRules } from '../data/brokerage-rules.js';
+import { segmentLabels } from '../data/statutory-charges.js';
 
 const { broker, rules = brokerageRules[broker.slug] } = Astro.props;
 
 const hasPlans = Boolean(rules?.plans);
 const planEntries = hasPlans ? Object.entries(rules.plans) : [];
-const hasFnoSplit = Boolean(rules?.fno);
 const defaultPlan = rules?.defaultPlan ?? (planEntries[0]?.[0] ?? '');
+
+const segments = [
+  { id: 'intraday', label: 'Intraday' },
+  { id: 'delivery', label: 'Delivery' },
+  { id: 'fno_futures', label: 'F&O Futures' },
+  { id: 'fno_options', label: 'F&O Options' },
+];
 ---
 
 <div
   id={`calc-${broker.slug}`}
-  class="brokerage-calc"
+  class="trade-calc"
   data-calculable={rules?.calculable ? '1' : '0'}
   data-rules={JSON.stringify(rules ?? null)}
+  data-broker-name={broker.name}
   data-default-plan={defaultPlan}
 >
   {!rules?.calculable ? (
@@ -24,9 +32,23 @@ const defaultPlan = rules?.defaultPlan ?? (planEntries[0]?.[0] ?? '');
     </p>
   ) : (
     <>
-      <form class="calc-form" aria-label={`${broker.name} brokerage calculator`}>
+      <div class="trade-calc-tabs" role="tablist" aria-label="Trade segment">
+        {segments.map((seg, i) => (
+          <button
+            type="button"
+            class="trade-calc-tab"
+            role="tab"
+            aria-selected={i === 0 ? 'true' : 'false'}
+            data-segment={seg.id}
+          >
+            {seg.label}
+          </button>
+        ))}
+      </div>
+
+      <form class="trade-calc-form" aria-label={`${broker.name} trade cost calculator`}>
         {hasPlans && (
-          <div class="calc-field">
+          <div class="trade-calc-field">
             <label for={`calc-plan-${broker.slug}`}>Pricing plan</label>
             <select id={`calc-plan-${broker.slug}`} name="plan">
               {planEntries.map(([id, plan]) => (
@@ -38,34 +60,35 @@ const defaultPlan = rules?.defaultPlan ?? (planEntries[0]?.[0] ?? '');
           </div>
         )}
 
-        <fieldset class="calc-segments">
-          <legend>Trade type</legend>
-          <label class="calc-radio">
-            <input type="radio" name="segment" value="delivery" checked /> Delivery
-          </label>
-          <label class="calc-radio">
-            <input type="radio" name="segment" value="intraday" /> Intraday
-          </label>
-          <label class="calc-radio">
-            <input type="radio" name="segment" value="fno" /> F&amp;O
-          </label>
-        </fieldset>
-
-        {hasFnoSplit && (
-          <fieldset class="calc-fno-type" hidden>
-            <legend>F&amp;O segment</legend>
-            <label class="calc-radio">
-              <input type="radio" name="fnoType" value="options" checked /> Options
-            </label>
-            <label class="calc-radio">
-              <input type="radio" name="fnoType" value="futures" /> Futures
-            </label>
-          </fieldset>
-        )}
-
-        <div class="calc-row">
-          <div class="calc-field">
-            <label for={`calc-qty-${broker.slug}`}>Quantity (shares / lots × lot size)</label>
+        <div class="trade-calc-prices">
+          <div class="trade-calc-field">
+            <label for={`calc-buy-${broker.slug}`}>Buy price (₹)</label>
+            <input
+              id={`calc-buy-${broker.slug}`}
+              class="calc-buy"
+              name="buyPrice"
+              type="number"
+              min="0.01"
+              step="0.01"
+              value="500"
+              required
+            />
+          </div>
+          <div class="trade-calc-field">
+            <label for={`calc-sell-${broker.slug}`}>Sell price (₹)</label>
+            <input
+              id={`calc-sell-${broker.slug}`}
+              class="calc-sell"
+              name="sellPrice"
+              type="number"
+              min="0.01"
+              step="0.01"
+              value="510"
+              required
+            />
+          </div>
+          <div class="trade-calc-field">
+            <label for={`calc-qty-${broker.slug}`}>Quantity</label>
             <input
               id={`calc-qty-${broker.slug}`}
               class="calc-qty"
@@ -76,33 +99,131 @@ const defaultPlan = rules?.defaultPlan ?? (planEntries[0]?.[0] ?? '');
               value="100"
               required
             />
-          </div>
-          <div class="calc-field">
-            <label for={`calc-price-${broker.slug}`}>Price per unit (₹)</label>
-            <input
-              id={`calc-price-${broker.slug}`}
-              class="calc-price"
-              name="price"
-              type="number"
-              min="0.01"
-              step="0.01"
-              value="500"
-              required
-            />
+            <span class="trade-calc-hint calc-qty-hint">shares or units (lots × lot size for F&amp;O)</span>
           </div>
         </div>
+
+        <fieldset class="trade-calc-exchange">
+          <legend>Exchange</legend>
+          <label class="trade-calc-radio">
+            <input type="radio" name="exchange" value="nse" checked /> NSE
+          </label>
+          <label class="trade-calc-radio">
+            <input type="radio" name="exchange" value="bse" /> BSE
+          </label>
+        </fieldset>
       </form>
 
-      <div class="calc-result" aria-live="polite" aria-atomic="true">
-        <p class="calc-result-label">Estimated brokerage per order</p>
-        <p class="calc-result-amount">—</p>
-        <p class="calc-result-detail"></p>
-        <p class="calc-result-note"></p>
+      <div class="trade-calc-panel" aria-live="polite" aria-atomic="true">
+        <p class="trade-calc-segment-label calc-segment-label">{segmentLabels.intraday}</p>
+
+        <div class="trade-calc-unavailable calc-unavailable-msg" hidden>
+          <p class="nd">Not calculable</p>
+          <p class="calc-unavailable-note"></p>
+        </div>
+
+        <div class="trade-calc-results calc-results">
+          <dl class="trade-calc-metrics">
+            <div class="trade-calc-metric trade-calc-metric--highlight">
+              <dt>Turnover</dt>
+              <dd class="calc-turnover">—</dd>
+            </div>
+          </dl>
+
+          <div class="trade-calc-section">
+            <h3 class="trade-calc-section-title calc-broker-heading">{broker.name} charges</h3>
+            <dl class="trade-calc-metrics">
+              <div class="trade-calc-metric">
+                <dt>Brokerage</dt>
+                <dd class="calc-brokerage">—</dd>
+              </div>
+            </dl>
+          </div>
+
+          <div class="trade-calc-section">
+            <h3 class="trade-calc-section-title">
+              Statutory charges
+              <span class="trade-calc-section-note">Levied by government &amp; exchanges</span>
+            </h3>
+            <dl class="trade-calc-metrics">
+              <div class="trade-calc-metric">
+                <dt>STT</dt>
+                <dd class="calc-stt">—</dd>
+              </div>
+              <div class="trade-calc-metric">
+                <dt>Exchange txn charge</dt>
+                <dd class="calc-exchange">—</dd>
+              </div>
+              <div class="trade-calc-metric">
+                <dt>GST</dt>
+                <dd class="calc-gst">—</dd>
+              </div>
+              <div class="trade-calc-metric">
+                <dt>SEBI charges</dt>
+                <dd class="calc-sebi">—</dd>
+              </div>
+              <div class="trade-calc-metric">
+                <dt>Stamp duty</dt>
+                <dd class="calc-stamp">—</dd>
+              </div>
+              <div class="trade-calc-metric calc-dp-row" hidden>
+                <dt>DP charges <span class="trade-calc-dp-note">(delivery sell)</span></dt>
+                <dd class="calc-dp">—</dd>
+              </div>
+            </dl>
+          </div>
+
+          <dl class="trade-calc-metrics trade-calc-metrics--totals">
+            <div class="trade-calc-metric">
+              <dt>Total tax &amp; charges</dt>
+              <dd class="calc-total-charges">—</dd>
+            </div>
+            <div class="trade-calc-metric">
+              <dt>Points to breakeven</dt>
+              <dd class="calc-breakeven">—</dd>
+            </div>
+            <div class="trade-calc-metric trade-calc-metric--pnl">
+              <dt>Net P&amp;L</dt>
+              <dd class="calc-net-pnl">—</dd>
+            </div>
+          </dl>
+
+          <details class="trade-calc-contract">
+            <summary>Contract note breakdown</summary>
+            <table class="trade-calc-table calc-contract-table">
+              <thead>
+                <tr>
+                  <th scope="col">Leg</th>
+                  <th scope="col">Price</th>
+                  <th scope="col">Qty</th>
+                  <th scope="col">Turnover</th>
+                  <th scope="col">Brokerage</th>
+                </tr>
+              </thead>
+              <tbody class="calc-contract-body"></tbody>
+              <tfoot>
+                <tr>
+                  <th scope="row" colspan="4">Gross P&amp;L</th>
+                  <td class="calc-contract-gross">—</td>
+                </tr>
+                <tr>
+                  <th scope="row" colspan="4">Total charges</th>
+                  <td class="calc-contract-charges">—</td>
+                </tr>
+                <tr class="trade-calc-table-total">
+                  <th scope="row" colspan="4">Net P&amp;L</th>
+                  <td class="calc-contract-net">—</td>
+                </tr>
+              </tfoot>
+            </table>
+          </details>
+        </div>
       </div>
 
       <p class="calc-disclaimer">
-        Brokerage only. Statutory and regulatory charges (STT, exchange transaction charges, GST,
-        stamp duty, etc.) are extra. Verify current rates on{' '}
+        Estimates for a buy-then-sell round trip using published {broker.name} brokerage and current
+        statutory rates. Exchange txn charges vary by stock category; DP charges apply on delivery
+        sells. Verify on{' '}
         <a href={broker.pricingUrl ?? broker.website} rel="nofollow noopener">
           {broker.name}&rsquo;s official pricing page
         </a>{' '}
@@ -113,22 +234,30 @@ const defaultPlan = rules?.defaultPlan ?? (planEntries[0]?.[0] ?? '');
 </div>
 
 <script>
-  import { computeBrokerage, formatInr } from '../utils/brokerageCalc.js';
+  import { computeTradeEstimate, formatInr } from '../utils/brokerageCalc.js';
+  import { segmentLabels } from '../data/statutory-charges.js';
 
+  /** @param {number} n */
+  function fmtPoints(n) {
+    if (!Number.isFinite(n)) return '—';
+    return n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  /** @param {HTMLElement} root */
   function initCalculator(root) {
     const rules = JSON.parse(root.dataset.rules || 'null');
-    const form = root.querySelector('.calc-form');
-    const amountEl = root.querySelector('.calc-result-amount');
-    const detailEl = root.querySelector('.calc-result-detail');
-    const noteEl = root.querySelector('.calc-result-note');
-    const fnoFieldset = root.querySelector('.calc-fno-type');
+    const brokerName = root.dataset.brokerName || 'Broker';
+    const form = root.querySelector('.trade-calc-form');
+    const tabs = root.querySelectorAll('.trade-calc-tab');
+    const resultsEl = root.querySelector('.calc-results');
+    const unavailableEl = root.querySelector('.trade-calc-unavailable');
+    const segmentLabelEl = root.querySelector('.calc-segment-label');
+    const dpRow = root.querySelector('.calc-dp-row');
 
-    function readSegment() {
-      return form.querySelector('input[name="segment"]:checked')?.value ?? 'delivery';
-    }
+    let activeSegment = 'intraday';
 
-    function readFnoType() {
-      return form.querySelector('input[name="fnoType"]:checked')?.value ?? 'options';
+    function readExchange() {
+      return form.querySelector('input[name="exchange"]:checked')?.value ?? 'nse';
     }
 
     function readPlan() {
@@ -136,49 +265,97 @@ const defaultPlan = rules?.defaultPlan ?? (planEntries[0]?.[0] ?? '');
       return sel ? sel.value : undefined;
     }
 
+    function setText(sel, text) {
+      const el = root.querySelector(sel);
+      if (el) el.textContent = text;
+    }
+
+    function setPnlClass(el, value) {
+      if (!el) return;
+      el.classList.remove('positive', 'negative');
+      if (value > 0) el.classList.add('positive');
+      else if (value < 0) el.classList.add('negative');
+    }
+
     function update() {
-      const segment = readSegment();
-      if (fnoFieldset) {
-        fnoFieldset.hidden = segment !== 'fno';
-      }
-
+      const buyPrice = Number(form.querySelector('.calc-buy').value);
+      const sellPrice = Number(form.querySelector('.calc-sell').value);
       const qty = Number(form.querySelector('.calc-qty').value);
-      const price = Number(form.querySelector('.calc-price').value);
 
-      const result = computeBrokerage({
+      segmentLabelEl.textContent = segmentLabels[activeSegment] ?? activeSegment;
+
+      const result = computeTradeEstimate({
         rules,
-        segment,
+        tradeSegment: activeSegment,
+        exchange: readExchange(),
+        buyPrice,
+        sellPrice,
         qty,
-        price,
         planId: readPlan(),
-        fnoType: readFnoType(),
       });
 
       if (!result.calculable) {
-        amountEl.textContent = 'Not calculable';
-        amountEl.classList.add('nd');
-        detailEl.textContent = result.note ?? '';
-        noteEl.textContent = result.turnover
-          ? `Turnover: ${formatInr(result.turnover)} (qty × price)`
-          : '';
+        resultsEl.hidden = true;
+        unavailableEl.hidden = false;
+        root.querySelector('.calc-unavailable-note').textContent = result.note ?? '';
         return;
       }
 
-      amountEl.classList.remove('nd');
-      amountEl.textContent = formatInr(result.amount);
-      detailEl.textContent = result.formula ?? '';
-      noteEl.textContent = [
-        result.turnover ? `Turnover: ${formatInr(result.turnover)}` : '',
-        result.note ?? '',
-      ]
-        .filter(Boolean)
-        .join(' · ');
+      resultsEl.hidden = false;
+      unavailableEl.hidden = true;
+
+      if (dpRow) dpRow.hidden = activeSegment !== 'delivery';
+
+      setText('.calc-turnover', formatInr(result.totalTurnover));
+      setText('.calc-brokerage', formatInr(result.brokerage.total));
+      setText('.calc-stt', formatInr(result.stt.total));
+      setText('.calc-exchange', formatInr(result.exchangeTxn.total));
+      setText('.calc-gst', formatInr(result.gst));
+      setText('.calc-sebi', formatInr(result.sebi));
+      setText('.calc-stamp', formatInr(result.stampDuty));
+      setText('.calc-dp', result.dpCharge ? formatInr(result.dpCharge) : '—');
+      setText('.calc-total-charges', formatInr(result.totalCharges));
+      setText('.calc-breakeven', fmtPoints(result.breakevenPoints));
+      setText('.calc-net-pnl', formatInr(result.netPnl));
+
+      const netEl = root.querySelector('.calc-net-pnl');
+      setPnlClass(netEl, result.netPnl);
+
+      const tbody = root.querySelector('.calc-contract-body');
+      if (tbody && result.contractNote) {
+        tbody.innerHTML = result.contractNote.legs
+          .map(
+            (leg) => `<tr>
+              <td>${leg.side}</td>
+              <td>${formatInr(leg.price)}</td>
+              <td>${leg.qty.toLocaleString('en-IN')}</td>
+              <td>${formatInr(leg.turnover)}</td>
+              <td>${formatInr(leg.brokerage)}</td>
+            </tr>`
+          )
+          .join('');
+        setText('.calc-contract-gross', formatInr(result.contractNote.grossPnl));
+        setText('.calc-contract-charges', formatInr(result.contractNote.totalCharges));
+        setText('.calc-contract-net', formatInr(result.contractNote.netPnl));
+        setPnlClass(root.querySelector('.calc-contract-net'), result.netPnl);
+      }
+
+      const brokerHeading = root.querySelector('.calc-broker-heading');
+      if (brokerHeading) brokerHeading.textContent = `${brokerName} charges`;
     }
+
+    tabs.forEach((tab) => {
+      tab.addEventListener('click', () => {
+        activeSegment = tab.dataset.segment ?? 'intraday';
+        tabs.forEach((t) => t.setAttribute('aria-selected', t === tab ? 'true' : 'false'));
+        update();
+      });
+    });
 
     form.addEventListener('input', update);
     form.addEventListener('change', update);
     update();
   }
 
-  document.querySelectorAll('.brokerage-calc[data-calculable="1"]').forEach(initCalculator);
+  document.querySelectorAll('.trade-calc[data-calculable="1"]').forEach(initCalculator);
 </script>
